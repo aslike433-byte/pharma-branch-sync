@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import { 
   ArrowRight, 
   Camera, 
@@ -10,16 +11,55 @@ import {
   LogOut,
   Building2,
   RefreshCw,
-  ChevronLeft
+  ChevronLeft,
+  Download,
+  Upload,
+  Database,
+  RotateCcw
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { useDatabase } from "@/hooks/useDatabase";
+import { toast } from "@/hooks/use-toast";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { createBackup, restoreBackup, resetDatabase, isLoading } = useDatabase();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleRestoreClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await restoreBackup(file);
+      // إعادة تحميل الصفحة لتحديث البيانات
+      window.location.reload();
+    }
+    // إعادة تعيين الـ input
+    e.target.value = '';
+  };
+
+  const handleReset = () => {
+    if (confirm('هل أنت متأكد من إعادة تعيين قاعدة البيانات؟ سيتم حذف جميع البيانات!')) {
+      resetDatabase();
+      window.location.reload();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* Header */}
       <header className="sticky top-0 z-40 bg-card border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
@@ -61,32 +101,78 @@ export default function Settings() {
               <Building2 className="w-6 h-6 text-info" />
             </div>
             <p className="text-2xl font-bold">15</p>
-            <p className="text-xs text-muted-foreground">Branches Managed</p>
+            <p className="text-xs text-muted-foreground">الفروع المُدارة</p>
           </div>
           <div className="pharma-card p-4 text-center animate-slide-up" style={{ animationDelay: '100ms' }}>
             <div className="flex justify-center mb-2">
               <RefreshCw className="w-6 h-6 text-success" />
             </div>
-            <p className="text-2xl font-bold">Synced</p>
-            <p className="text-xs text-muted-foreground">Data Status</p>
+            <p className="text-2xl font-bold">متزامن</p>
+            <p className="text-xs text-muted-foreground">حالة البيانات</p>
           </div>
         </div>
+
+        {/* Backup Section */}
+        <section className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
+            النسخ الاحتياطي
+          </h3>
+          <div className="pharma-card divide-y divide-border">
+            <button 
+              onClick={createBackup}
+              disabled={isLoading}
+              className="w-full"
+            >
+              <SettingsItem
+                icon={Download}
+                title="إنشاء نسخة احتياطية"
+                subtitle="تحميل ملف JSON للبيانات"
+                hasArrow
+              />
+            </button>
+            <button 
+              onClick={handleRestoreClick}
+              disabled={isLoading}
+              className="w-full"
+            >
+              <SettingsItem
+                icon={Upload}
+                title="استعادة نسخة احتياطية"
+                subtitle="استيراد ملف JSON"
+                hasArrow
+              />
+            </button>
+            <button 
+              onClick={handleReset}
+              disabled={isLoading}
+              className="w-full"
+            >
+              <SettingsItem
+                icon={RotateCcw}
+                title="إعادة تعيين البيانات"
+                subtitle="استعادة البيانات الافتراضية"
+                hasArrow
+                destructive
+              />
+            </button>
+          </div>
+        </section>
 
         {/* Security Section */}
         <section className="space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
-            SECURITY
+            الأمان
           </h3>
           <div className="pharma-card divide-y divide-border">
             <SettingsItem
               icon={Lock}
-              title="Change Password"
-              subtitle="Last changed 30 days ago"
+              title="تغيير كلمة المرور"
+              subtitle="آخر تغيير منذ 30 يوم"
               hasArrow
             />
             <SettingsItem
               icon={Scan}
-              title="Face ID Login"
+              title="تسجيل الدخول بالبصمة"
               hasSwitch
               defaultChecked
             />
@@ -96,26 +182,47 @@ export default function Settings() {
         {/* Preferences Section */}
         <section className="space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
-            PREFERENCES
+            التفضيلات
           </h3>
           <div className="pharma-card divide-y divide-border">
             <SettingsItem
               icon={Globe}
-              title="Language"
-              value="English"
+              title="اللغة"
+              value="العربية"
               hasArrow
             />
             <SettingsItem
               icon={History}
-              title="Login History"
+              title="سجل الدخول"
               hasArrow
             />
             <SettingsItem
               icon={Bell}
-              title="Sync Notifications"
-              subtitle="Alert when sync completes"
+              title="إشعارات المزامنة"
+              subtitle="تنبيه عند اكتمال المزامنة"
               hasSwitch
             />
+          </div>
+        </section>
+
+        {/* Database Info */}
+        <section className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
+            قاعدة البيانات
+          </h3>
+          <div className="pharma-card p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-success/10">
+                <Database className="w-6 h-6 text-success" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">التخزين المحلي</p>
+                <p className="text-xs text-muted-foreground">localStorage - متصل</p>
+              </div>
+              <div className="px-3 py-1 rounded-full bg-success/10 text-success text-xs font-medium">
+                نشط
+              </div>
+            </div>
           </div>
         </section>
 
@@ -125,15 +232,15 @@ export default function Settings() {
           className="w-full pharma-card p-4 flex items-center justify-center gap-2 text-destructive hover:bg-destructive/5 transition-colors"
         >
           <LogOut className="w-5 h-5" />
-          <span className="font-medium">Sign Out</span>
+          <span className="font-medium">تسجيل الخروج</span>
         </button>
 
         {/* Footer */}
         <div className="text-center pt-4 pb-8">
           <p className="text-sm text-muted-foreground">PharmaLife App v1.0.4</p>
           <div className="flex items-center justify-center gap-4 mt-2">
-            <button className="text-sm text-primary">Privacy Policy</button>
-            <button className="text-sm text-primary">Terms of Service</button>
+            <button className="text-sm text-primary">سياسة الخصوصية</button>
+            <button className="text-sm text-primary">شروط الاستخدام</button>
           </div>
         </div>
       </main>
@@ -149,6 +256,7 @@ interface SettingsItemProps {
   hasArrow?: boolean;
   hasSwitch?: boolean;
   defaultChecked?: boolean;
+  destructive?: boolean;
 }
 
 function SettingsItem({ 
@@ -158,15 +266,16 @@ function SettingsItem({
   value, 
   hasArrow, 
   hasSwitch,
-  defaultChecked 
+  defaultChecked,
+  destructive
 }: SettingsItemProps) {
   return (
     <div className="flex items-center gap-3 p-4">
-      <div className="p-2 rounded-xl bg-muted">
-        <Icon className="w-5 h-5 text-muted-foreground" />
+      <div className={cn("p-2 rounded-xl", destructive ? "bg-destructive/10" : "bg-muted")}>
+        <Icon className={cn("w-5 h-5", destructive ? "text-destructive" : "text-muted-foreground")} />
       </div>
-      <div className="flex-1">
-        <p className="font-medium">{title}</p>
+      <div className="flex-1 text-right">
+        <p className={cn("font-medium", destructive && "text-destructive")}>{title}</p>
         {subtitle && (
           <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
         )}
@@ -175,7 +284,7 @@ function SettingsItem({
         <span className="text-sm text-muted-foreground">{value}</span>
       )}
       {hasArrow && (
-        <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+        <ChevronLeft className={cn("w-5 h-5", destructive ? "text-destructive" : "text-muted-foreground")} />
       )}
       {hasSwitch && (
         <Switch defaultChecked={defaultChecked} />
