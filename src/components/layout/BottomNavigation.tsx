@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, FileText, Settings } from "lucide-react";
+import { Home, Users, BarChart3, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "الرئيسية", path: "/dashboard" },
   { icon: Users, label: "الموردين", path: "/suppliers" },
-  { icon: FileText, label: "الطلبات", path: "/orders" },
+  { icon: BarChart3, label: "التقارير", path: "/reports" },
   { icon: Settings, label: "الإعدادات", path: "/settings" },
 ];
 
