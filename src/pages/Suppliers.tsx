@@ -1,88 +1,93 @@
-import { useState } from "react";
-import { Search, Filter, Star, Phone, Edit2, Plus, WifiOff, ArrowUpDown, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Filter, Star, Phone, Edit2, Plus, WifiOff, ArrowUpDown, Trash2, MoreVertical } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AddSupplierModal } from "@/components/modals/AddSupplierModal";
+import { useDatabase } from "@/hooks/useDatabase";
+import { Supplier } from "@/lib/database/types";
 import { cn } from "@/lib/utils";
-
-interface Supplier {
-  id: string;
-  name: string;
-  category: string;
-  rating: number;
-  status: "active" | "inactive" | "pending";
-  totalOrders: number;
-  lastOrder: string;
-  image?: string;
-  pendingOrder?: {
-    amount: number;
-    status: string;
-  };
-}
-
-const suppliers: Supplier[] = [
-  {
-    id: "1",
-    name: "شركة الأمل الطبية",
-    category: "مستلزمات جراحية",
-    rating: 4.8,
-    status: "active",
-    totalOrders: 15,
-    lastOrder: "24 أكتوبر 2023"
-  },
-  {
-    id: "2",
-    name: "فارما إيجيبت",
-    category: "أدوية عامة",
-    rating: 3.5,
-    status: "inactive",
-    totalOrders: 4,
-    lastOrder: "10 سبتمبر 2023"
-  },
-  {
-    id: "3",
-    name: "المتحدة للأدوية",
-    category: "مستحضرات تجميل",
-    rating: 4.2,
-    status: "pending",
-    totalOrders: 8,
-    lastOrder: "5 نوفمبر 2023",
-    pendingOrder: {
-      amount: 5000,
-      status: "بانتظار التأكيد"
-    }
-  },
-  {
-    id: "4",
-    name: "الشرق للمستلزمات",
-    category: "معدات طبية",
-    rating: 4.5,
-    status: "active",
-    totalOrders: 22,
-    lastOrder: "1 ديسمبر 2023"
-  },
-];
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const filters = [
   { id: "all", label: "الكل" },
   { id: "top", label: "الأعلى تقييمًا", icon: Star },
-  { id: "recent", label: "مشتريات حديثة" },
-  { id: "pending", label: "طلبات معلقة" },
+  { id: "active", label: "نشط" },
+  { id: "inactive", label: "غير نشط" },
 ];
 
 const statusStyles = {
   active: { label: "نشط", color: "bg-success/15 text-success border-success/20" },
-  inactive: { label: "خامل", color: "bg-muted text-muted-foreground border-border" },
-  pending: { label: "طلب معلق", color: "bg-warning/15 text-warning border-warning/20" },
+  inactive: { label: "غير نشط", color: "bg-muted text-muted-foreground border-border" },
 };
 
 export default function Suppliers() {
+  const { getSuppliers, addSupplier, updateSupplier, deleteSupplier } = useDatabase();
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+
+  useEffect(() => {
+    setSuppliers(getSuppliers());
+  }, [getSuppliers]);
+
+  const refreshSuppliers = () => {
+    setSuppliers(getSuppliers());
+  };
+
+  const handleAddSupplier = (supplierData: Omit<Supplier, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (editingSupplier) {
+      updateSupplier(editingSupplier.id, supplierData);
+    } else {
+      addSupplier(supplierData);
+    }
+    refreshSuppliers();
+    setEditingSupplier(null);
+  };
+
+  const handleEditSupplier = (supplier: Supplier) => {
+    setEditingSupplier(supplier);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteSupplier = (id: string) => {
+    if (confirm("هل أنت متأكد من حذف هذا المورد؟")) {
+      deleteSupplier(id);
+      refreshSuppliers();
+    }
+  };
+
+  const filteredSuppliers = suppliers
+    .filter(supplier => {
+      if (activeFilter === "active") return supplier.status === "active";
+      if (activeFilter === "inactive") return supplier.status === "inactive";
+      return true;
+    })
+    .filter(supplier => 
+      supplier.name.includes(searchQuery) || 
+      supplier.phone.includes(searchQuery) ||
+      supplier.email.includes(searchQuery)
+    )
+    .sort((a, b) => {
+      if (activeFilter === "top") return b.rating - a.rating;
+      return 0;
+    });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24">
       <Header title="إدارة الموردين" />
 
       <main className="px-4 py-4 space-y-4">
@@ -130,7 +135,7 @@ export default function Suppliers() {
         {/* Results Count & Sort */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
-            {suppliers.length} مورد متاح
+            {filteredSuppliers.length} مورد متاح
           </span>
           <button className="flex items-center gap-1.5 text-sm text-primary">
             <ArrowUpDown className="w-4 h-4" />
@@ -140,99 +145,136 @@ export default function Suppliers() {
 
         {/* Suppliers List */}
         <div className="space-y-3">
-          {suppliers.map((supplier, index) => (
-            <div
-              key={supplier.id}
-              className={cn(
-                "pharma-card overflow-hidden animate-slide-up",
-                supplier.status === "active" && "border-r-4 border-r-success",
-                supplier.status === "pending" && "border-r-4 border-r-warning"
-              )}
-              style={{ animationDelay: `${index * 80}ms` }}
-            >
-              <div className="p-4">
-                {/* Header */}
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
-                    {supplier.name.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{supplier.name}</h3>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={cn(
-                        "pharma-badge text-[10px]",
-                        statusStyles[supplier.status].color
-                      )}>
-                        {statusStyles[supplier.status].label}
-                      </span>
-                      <span className="text-xs text-muted-foreground">• {supplier.category}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-warning/10">
-                    <span className="text-sm font-semibold text-foreground">{supplier.rating}</span>
-                    <Star className="w-3.5 h-3.5 fill-warning text-warning" />
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="text-center p-2 rounded-lg bg-muted/50">
-                    <p className="text-xs text-muted-foreground">آخر شراء</p>
-                    <p className="text-sm font-medium">{supplier.lastOrder}</p>
-                  </div>
-                  <div className="text-center p-2 rounded-lg bg-muted/50">
-                    <p className="text-xs text-muted-foreground">إجمالي الطلبات</p>
-                    <p className="text-sm font-medium">{supplier.totalOrders} طلب ناجح</p>
-                  </div>
-                </div>
-
-                {/* Pending Order Alert */}
-                {supplier.pendingOrder && (
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-info/10 text-info text-sm mb-3">
-                    <span className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px]">i</span>
-                    <span>يوجد طلب بقيمة {supplier.pendingOrder.amount.toLocaleString('ar-EG')} ج.م {supplier.pendingOrder.status}</span>
-                  </div>
+          {filteredSuppliers.length === 0 ? (
+            <div className="pharma-card p-8 text-center">
+              <p className="text-muted-foreground">لا يوجد موردين مطابقين</p>
+            </div>
+          ) : (
+            filteredSuppliers.map((supplier, index) => (
+              <div
+                key={supplier.id}
+                className={cn(
+                  "pharma-card overflow-hidden animate-slide-up",
+                  supplier.status === "active" && "border-r-4 border-r-success"
                 )}
+                style={{ animationDelay: `${index * 80}ms` }}
+              >
+                <div className="p-4">
+                  {/* Header */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      {supplier.name.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{supplier.name}</h3>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={cn(
+                          "pharma-badge text-[10px]",
+                          statusStyles[supplier.status].color
+                        )}>
+                          {statusStyles[supplier.status].label}
+                        </span>
+                        {supplier.email && (
+                          <span className="text-xs text-muted-foreground">• {supplier.email}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-warning/10">
+                        <span className="text-sm font-semibold text-foreground">{supplier.rating}</span>
+                        <Star className="w-3.5 h-3.5 fill-warning text-warning" />
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-1.5 rounded-lg hover:bg-muted">
+                            <MoreVertical className="w-5 h-5 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditSupplier(supplier)}>
+                            <Edit2 className="w-4 h-4 ml-2" />
+                            تعديل
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteSupplier(supplier.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 ml-2" />
+                            حذف
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 h-10 rounded-xl gap-2"
-                  >
-                    {supplier.pendingOrder ? (
-                      <>
-                        <Eye className="w-4 h-4" />
-                        عرض الطلب
-                      </>
-                    ) : (
-                      <>
-                        <Phone className="w-4 h-4" />
-                        إتصال
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    size="icon"
-                    className="h-10 w-10 rounded-xl bg-accent text-accent-foreground"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </Button>
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="text-center p-2 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground">آخر شراء</p>
+                      <p className="text-sm font-medium">{formatDate(supplier.lastOrderDate)}</p>
+                    </div>
+                    <div className="text-center p-2 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground">إجمالي الطلبات</p>
+                      <p className="text-sm font-medium">{supplier.totalOrders} طلب</p>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  {supplier.address && (
+                    <div className="text-sm text-muted-foreground mb-3">
+                      📍 {supplier.address}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-10 rounded-xl gap-2"
+                      onClick={() => window.open(`tel:${supplier.phone}`)}
+                    >
+                      <Phone className="w-4 h-4" />
+                      اتصال
+                    </Button>
+                    <Button
+                      size="icon"
+                      className="h-10 w-10 rounded-xl bg-accent text-accent-foreground"
+                      onClick={() => handleEditSupplier(supplier)}
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
-
-        {/* Add Button */}
-        <Button className="fixed bottom-20 left-4 right-4 h-12 rounded-xl pharma-btn-primary gap-2 shadow-lg">
-          <Plus className="w-5 h-5" />
-          إضافة مورد
-        </Button>
       </main>
+
+      {/* Add Button */}
+      <Button 
+        onClick={() => {
+          setEditingSupplier(null);
+          setIsModalOpen(true);
+        }}
+        className="fixed bottom-20 left-4 right-4 h-12 rounded-xl pharma-btn-primary gap-2 shadow-lg"
+      >
+        <Plus className="w-5 h-5" />
+        إضافة مورد
+      </Button>
+
+      <AddSupplierModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingSupplier(null);
+        }}
+        onSave={handleAddSupplier}
+        editSupplier={editingSupplier}
+      />
 
       <BottomNavigation />
     </div>
