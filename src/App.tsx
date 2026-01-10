@@ -8,8 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Suppliers from "./pages/Suppliers";
 import Settings from "./pages/Settings";
 import Branches from "./pages/Branches";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Settings />} />
           <Route path="/branches" element={<Branches />} />
+          <Route path="/reports" element={<Reports />} />
           <Route path="/orders" element={<Dashboard />} />
           <Route path="/inventory" element={<Dashboard />} />
           <Route path="/licenses" element={<Dashboard />} />
