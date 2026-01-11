@@ -9,6 +9,7 @@ import Suppliers from "./pages/Suppliers";
 import Settings from "./pages/Settings";
 import Branches from "./pages/Branches";
 import Reports from "./pages/Reports";
+import Licenses from "./pages/Licenses";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -28,7 +29,7 @@ const App = () => (
           <Route path="/reports" element={<Reports />} />
           <Route path="/orders" element={<Dashboard />} />
           <Route path="/inventory" element={<Dashboard />} />
-          <Route path="/licenses" element={<Dashboard />} />
+          <Route path="/licenses" element={<Licenses />} />
           <Route path="/payroll" element={<Dashboard />} />
           <Route path="/sales" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
