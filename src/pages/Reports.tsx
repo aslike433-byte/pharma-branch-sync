@@ -22,6 +22,14 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { exportReportToPDF } from "@/lib/pdfExport";
 import {
+  BranchSalesChart,
+  SalesDistributionChart,
+  MonthlySalesTrend,
+  EmployeeSalaryChart,
+  LicenseStatusChart,
+  EmployeesByBranchChart,
+} from "@/components/charts/ReportCharts";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -240,27 +248,11 @@ export default function Reports() {
               </div>
             </div>
 
-            {/* Licenses Status */}
-            <div className="pharma-card p-4">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                حالة التراخيص
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-3 rounded-xl bg-success/10">
-                  <p className="text-2xl font-bold text-success">{validLicenses}</p>
-                  <p className="text-xs text-muted-foreground">سارية</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-warning/10">
-                  <p className="text-2xl font-bold text-warning">{expiringLicenses}</p>
-                  <p className="text-xs text-muted-foreground">تنتهي قريباً</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-destructive/10">
-                  <p className="text-2xl font-bold text-destructive">{expiredLicenses}</p>
-                  <p className="text-xs text-muted-foreground">منتهية</p>
-                </div>
-              </div>
-            </div>
+            {/* Licenses Status Chart */}
+            <LicenseStatusChart licenses={licenses} />
+
+            {/* Monthly Sales Trend */}
+            <MonthlySalesTrend currentSales={totalSales} />
           </div>
         )}
 
@@ -284,6 +276,9 @@ export default function Reports() {
                 </p>
               </div>
             </div>
+
+            {/* Branch Sales Chart */}
+            <BranchSalesChart branches={branches} />
 
             {/* Branches Performance List */}
             <div className="pharma-card p-4">
@@ -366,38 +361,11 @@ export default function Reports() {
               </p>
             </div>
 
-            {/* Sales by Branch */}
-            <div className="pharma-card p-4">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <PieChart className="w-5 h-5 text-primary" />
-                توزيع المبيعات على الفروع
-              </h3>
-              <div className="space-y-3">
-                {branches
-                  .sort((a, b) => b.monthlySales - a.monthlySales)
-                  .slice(0, 5)
-                  .map((branch) => {
-                    const percentage = ((branch.monthlySales / totalSales) * 100).toFixed(1);
-                    return (
-                      <div key={branch.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
-                            {branch.name.charAt(branch.name.indexOf(' ') + 1) || branch.name.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm">{branch.name}</p>
-                            <p className="text-xs text-muted-foreground">{branch.employeesCount} موظف</p>
-                          </div>
-                        </div>
-                        <div className="text-left">
-                          <p className="font-bold">{(branch.monthlySales / 1000).toFixed(0)}K</p>
-                          <p className="text-xs text-muted-foreground">{percentage}%</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
+            {/* Sales Distribution Chart */}
+            <SalesDistributionChart branches={branches} />
+
+            {/* Monthly Sales Trend */}
+            <MonthlySalesTrend currentSales={totalSales} />
 
             {/* Sales Comparison */}
             <div className="pharma-card p-4">
@@ -448,6 +416,12 @@ export default function Reports() {
                 </div>
               </div>
             </div>
+
+            {/* Salary Distribution Chart */}
+            <EmployeeSalaryChart employees={employees} />
+
+            {/* Employees by Branch Chart */}
+            <EmployeesByBranchChart branches={branches} />
 
             {/* Salary Breakdown */}
             <div className="pharma-card p-4">
