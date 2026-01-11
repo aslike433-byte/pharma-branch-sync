@@ -67,6 +67,19 @@ export function useDatabase() {
     return newLicense;
   }, []);
 
+  const updateLicense = useCallback((id: string, updates: Partial<License>) => {
+    const updated = db.updateLicense(id, updates);
+    if (updated) {
+      toast({ title: 'تم تحديث الترخيص بنجاح', variant: 'default' });
+    }
+    return updated;
+  }, []);
+
+  const deleteLicense = useCallback((id: string) => {
+    db.deleteLicense(id);
+    toast({ title: 'تم حذف الترخيص بنجاح', variant: 'default' });
+  }, []);
+
   // ==================== الموظفين ====================
   const getEmployees = useCallback(() => {
     return db.getEmployees();
@@ -147,6 +160,8 @@ export function useDatabase() {
     // التراخيص
     getLicenses,
     addLicense,
+    updateLicense,
+    deleteLicense,
     // الموظفين
     getEmployees,
     addEmployee,
