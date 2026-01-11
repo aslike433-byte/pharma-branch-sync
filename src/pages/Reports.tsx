@@ -11,13 +11,16 @@ import {
   Download,
   ChevronDown,
   BarChart3,
-  PieChart
+  PieChart,
+  Loader2
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { useDatabase } from "@/hooks/useDatabase";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
+import { exportReportToPDF } from "@/lib/pdfExport";
 import {
   Select,
   SelectContent,
@@ -46,6 +49,7 @@ export default function Reports() {
   const [selectedMonth, setSelectedMonth] = useState("2024-01");
   const [activeReport, setActiveReport] = useState("overview");
   const [stats, setStats] = useState<ReturnType<typeof getStats> | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const dbStats = getStats();
@@ -72,6 +76,40 @@ export default function Reports() {
   const validLicenses = licenses.filter(l => l.status === 'valid').length;
   const expiringLicenses = licenses.filter(l => l.status === 'expiring').length;
   const expiredLicenses = licenses.filter(l => l.status === 'expired').length;
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      exportReportToPDF({
+        branches,
+        employees,
+        suppliers,
+        licenses,
+        stats: {
+          totalBranches: stats?.totalBranches || 0,
+          activeBranches: stats?.activeBranches || 0,
+          totalSuppliers: stats?.totalSuppliers || 0,
+          activeSuppliers: stats?.activeSuppliers || 0,
+          totalEmployees: stats?.totalEmployees || 0,
+          totalSales: totalSales,
+        },
+        selectedMonth,
+        reportType: activeReport,
+      });
+      toast({
+        title: "تم التصدير بنجاح",
+        description: "تم تحميل ملف PDF للتقرير",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في التصدير",
+        description: "حدث خطأ أثناء تصدير التقرير",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -490,9 +528,22 @@ export default function Reports() {
         )}
 
         {/* Export Button */}
-        <Button className="w-full h-12 rounded-xl pharma-btn-primary gap-2">
-          <Download className="w-5 h-5" />
-          تصدير التقرير PDF
+        <Button 
+          onClick={handleExportPDF}
+          disabled={isExporting}
+          className="w-full h-12 rounded-xl pharma-btn-primary gap-2"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              جاري التصدير...
+            </>
+          ) : (
+            <>
+              <Download className="w-5 h-5" />
+              تصدير التقرير PDF
+            </>
+          )}
         </Button>
       </main>
 
