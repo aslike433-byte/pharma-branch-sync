@@ -91,6 +91,19 @@ export function useDatabase() {
     return newEmployee;
   }, []);
 
+  const updateEmployee = useCallback((id: string, updates: Partial<Employee>) => {
+    const updated = db.updateEmployee(id, updates);
+    if (updated) {
+      toast({ title: 'تم تحديث بيانات الموظف بنجاح', variant: 'default' });
+    }
+    return updated;
+  }, []);
+
+  const deleteEmployee = useCallback((id: string) => {
+    db.deleteEmployee(id);
+    toast({ title: 'تم حذف الموظف بنجاح', variant: 'default' });
+  }, []);
+
   // ==================== الإحصائيات ====================
   const getStats = useCallback(() => {
     return db.getStats();
@@ -165,6 +178,8 @@ export function useDatabase() {
     // الموظفين
     getEmployees,
     addEmployee,
+    updateEmployee,
+    deleteEmployee,
     // الإحصائيات
     getStats,
     // المصادقة
