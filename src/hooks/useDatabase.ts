@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { db } from '@/lib/database';
-import { Branch, Supplier, License, Employee, BackupData } from '@/lib/database/types';
+import { Branch, Supplier, License, Employee, Product, BackupData } from '@/lib/database/types';
 import { toast } from '@/hooks/use-toast';
 
 export function useDatabase() {
@@ -104,6 +104,30 @@ export function useDatabase() {
     toast({ title: 'تم حذف الموظف بنجاح', variant: 'default' });
   }, []);
 
+  // ==================== المخزون ====================
+  const getProducts = useCallback(() => {
+    return db.getProducts();
+  }, []);
+
+  const addProduct = useCallback((product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newProduct = db.addProduct(product);
+    toast({ title: 'تم إضافة الصنف بنجاح', variant: 'default' });
+    return newProduct;
+  }, []);
+
+  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
+    const updated = db.updateProduct(id, updates);
+    if (updated) {
+      toast({ title: 'تم تحديث الصنف بنجاح', variant: 'default' });
+    }
+    return updated;
+  }, []);
+
+  const deleteProduct = useCallback((id: string) => {
+    db.deleteProduct(id);
+    toast({ title: 'تم حذف الصنف بنجاح', variant: 'default' });
+  }, []);
+
   // ==================== الإحصائيات ====================
   const getStats = useCallback(() => {
     return db.getStats();
@@ -180,6 +204,11 @@ export function useDatabase() {
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    // المخزون
+    getProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
     // الإحصائيات
     getStats,
     // المصادقة

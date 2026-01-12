@@ -37,6 +37,13 @@ const defaultData: DatabaseSchema = {
   users: [
     { id: '1', username: 'admin', password: 'admin123', name: 'مدير النظام', role: 'admin', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   ],
+  products: [
+    { id: '1', branchId: '1', name: 'باراسيتامول 500 مجم', category: 'medicines', sku: 'MED-001', quantity: 150, minQuantity: 50, price: 25, costPrice: 18, supplierId: '1', expiryDate: '2025-06-01', status: 'available', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: '2', branchId: '1', name: 'أموكسيسيللين 500 مجم', category: 'medicines', sku: 'MED-002', quantity: 30, minQuantity: 40, price: 45, costPrice: 32, supplierId: '1', expiryDate: '2025-03-15', status: 'low', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: '3', branchId: '1', name: 'فيتامين سي 1000', category: 'supplements', sku: 'SUP-001', quantity: 0, minQuantity: 20, price: 85, costPrice: 60, supplierId: '2', expiryDate: '2025-12-01', status: 'out', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: '4', branchId: '2', name: 'كريم مرطب للبشرة', category: 'cosmetics', sku: 'COS-001', quantity: 45, minQuantity: 15, price: 120, costPrice: 85, supplierId: '3', status: 'available', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: '5', branchId: '1', name: 'جهاز قياس الضغط', category: 'equipment', sku: 'EQP-001', quantity: 8, minQuantity: 5, price: 450, costPrice: 320, supplierId: '2', status: 'available', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ],
   settings: {
     companyName: 'صيدليات النادي',
     currency: 'EGP',
@@ -236,6 +243,54 @@ class LocalDatabase {
   deleteEmployee(id: string) {
     this.data.employees = this.data.employees.filter(e => e.id !== id);
     this.saveToStorage(this.data);
+  }
+
+  // ==================== المخزون ====================
+  getProducts(): DatabaseSchema['products'] {
+    return [...(this.data.products || [])];
+  }
+
+  getProduct(id: string) {
+    return (this.data.products || []).find(p => p.id === id);
+  }
+
+  addProduct(product: Omit<DatabaseSchema['products'][0], 'id' | 'createdAt' | 'updatedAt'>) {
+    if (!this.data.products) {
+      this.data.products = [];
+    }
+    const newProduct = {
+      ...product,
+      id: this.generateId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.data.products.push(newProduct);
+    this.saveToStorage(this.data);
+    return newProduct;
+  }
+
+  updateProduct(id: string, updates: Partial<DatabaseSchema['products'][0]>) {
+    if (!this.data.products) {
+      this.data.products = [];
+    }
+    const index = this.data.products.findIndex(p => p.id === id);
+    if (index !== -1) {
+      this.data.products[index] = {
+        ...this.data.products[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      this.saveToStorage(this.data);
+      return this.data.products[index];
+    }
+    return null;
+  }
+
+  deleteProduct(id: string) {
+    if (this.data.products) {
+      this.data.products = this.data.products.filter(p => p.id !== id);
+      this.saveToStorage(this.data);
+    }
   }
 
   // ==================== المبيعات ====================

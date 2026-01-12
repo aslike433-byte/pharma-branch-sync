@@ -89,6 +89,24 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Product {
+  id: string;
+  branchId: string;
+  name: string;
+  category: 'medicines' | 'cosmetics' | 'supplements' | 'equipment' | 'other';
+  sku: string;
+  barcode?: string;
+  quantity: number;
+  minQuantity: number;
+  price: number;
+  costPrice: number;
+  supplierId?: string;
+  expiryDate?: string;
+  status: 'available' | 'low' | 'out';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DatabaseSchema {
   branches: Branch[];
   suppliers: Supplier[];
@@ -97,6 +115,7 @@ export interface DatabaseSchema {
   expenses: Expense[];
   sales: Sale[];
   users: User[];
+  products: Product[];
   settings: Record<string, any>;
 }
 
