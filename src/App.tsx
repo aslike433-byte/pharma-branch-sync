@@ -11,6 +11,7 @@ import Branches from "./pages/Branches";
 import Reports from "./pages/Reports";
 import Licenses from "./pages/Licenses";
 import Payroll from "./pages/Payroll";
+import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
@@ -29,7 +30,7 @@ const App = () => (
           <Route path="/branches" element={<Branches />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/orders" element={<Dashboard />} />
-          <Route path="/inventory" element={<Dashboard />} />
+          <Route path="/inventory" element={<Inventory />} />
           <Route path="/licenses" element={<Licenses />} />
           <Route path="/payroll" element={<Payroll />} />
           <Route path="/sales" element={<Dashboard />} />
