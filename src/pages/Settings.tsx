@@ -15,16 +15,21 @@ import {
   Download,
   Upload,
   Database,
-  RotateCcw
+  RotateCcw,
+  Moon,
+  Sun,
+  Monitor
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useDatabase } from "@/hooks/useDatabase";
 import { toast } from "@/hooks/use-toast";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Settings() {
   const navigate = useNavigate();
   const { createBackup, restoreBackup, resetDatabase, isLoading } = useDatabase();
+  const { theme, setTheme, isDark, isSystem } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleRestoreClick = () => {
@@ -185,6 +190,64 @@ export default function Settings() {
             التفضيلات
           </h3>
           <div className="pharma-card divide-y divide-border">
+            {/* Theme Selection */}
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-muted">
+                  {isDark ? (
+                    <Moon className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <Sun className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="font-medium">المظهر</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {isSystem ? "تلقائي حسب النظام" : isDark ? "الوضع الداكن" : "الوضع الفاتح"}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setTheme("light")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all",
+                    theme === "light" 
+                      ? "border-primary bg-primary/10 text-primary" 
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  <Sun className="w-4 h-4" />
+                  <span className="text-sm font-medium">فاتح</span>
+                </button>
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all",
+                    theme === "dark" 
+                      ? "border-primary bg-primary/10 text-primary" 
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  <Moon className="w-4 h-4" />
+                  <span className="text-sm font-medium">داكن</span>
+                </button>
+                <button
+                  onClick={() => setTheme("system")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all",
+                    theme === "system" 
+                      ? "border-primary bg-primary/10 text-primary" 
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  <Monitor className="w-4 h-4" />
+                  <span className="text-sm font-medium">تلقائي</span>
+                </button>
+              </div>
+            </div>
+            
             <SettingsItem
               icon={Globe}
               title="اللغة"
