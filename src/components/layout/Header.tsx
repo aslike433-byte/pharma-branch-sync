@@ -1,22 +1,34 @@
-import { Bell, Menu } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Bell, Menu, ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   title: string;
   showNotifications?: boolean;
+  showBack?: boolean;
   onMenuClick?: () => void;
 }
 
-export function Header({ title, showNotifications = true, onMenuClick }: HeaderProps) {
+export function Header({ title, showNotifications = true, showBack = false, onMenuClick }: HeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <header className="sticky top-0 z-40 bg-card border-b border-border px-4 py-3">
       <div className="flex items-center justify-between">
-        <button
-          onClick={onMenuClick}
-          className="p-2 rounded-xl hover:bg-muted transition-colors"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+        {showBack ? (
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <ArrowRight className="w-6 h-6" />
+          </button>
+        ) : (
+          <button
+            onClick={onMenuClick}
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
 
         <h1 className="text-lg font-bold">{title}</h1>
 
