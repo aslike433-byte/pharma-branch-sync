@@ -107,6 +107,31 @@ export interface Product {
   updatedAt: string;
 }
 
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Order {
+  id: string;
+  supplierId: string;
+  branchId: string;
+  orderNumber: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  paymentStatus: 'unpaid' | 'partial' | 'paid';
+  notes?: string;
+  orderDate: string;
+  expectedDeliveryDate?: string;
+  deliveredDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DatabaseSchema {
   branches: Branch[];
   suppliers: Supplier[];
@@ -116,6 +141,7 @@ export interface DatabaseSchema {
   sales: Sale[];
   users: User[];
   products: Product[];
+  orders: Order[];
   settings: Record<string, any>;
 }
 

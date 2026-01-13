@@ -44,6 +44,11 @@ const defaultData: DatabaseSchema = {
     { id: '4', branchId: '2', name: 'كريم مرطب للبشرة', category: 'cosmetics', sku: 'COS-001', quantity: 45, minQuantity: 15, price: 120, costPrice: 85, supplierId: '3', status: 'available', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
     { id: '5', branchId: '1', name: 'جهاز قياس الضغط', category: 'equipment', sku: 'EQP-001', quantity: 8, minQuantity: 5, price: 450, costPrice: 320, supplierId: '2', status: 'available', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   ],
+  orders: [
+    { id: '1', supplierId: '1', branchId: '1', orderNumber: 'ORD-2024-001', items: [{ productId: '1', productName: 'باراسيتامول 500 مجم', quantity: 100, unitPrice: 18, total: 1800 }], totalAmount: 1800, status: 'delivered', paymentStatus: 'paid', orderDate: '2024-01-01', expectedDeliveryDate: '2024-01-05', deliveredDate: '2024-01-04', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: '2', supplierId: '2', branchId: '1', orderNumber: 'ORD-2024-002', items: [{ productId: '3', productName: 'فيتامين سي 1000', quantity: 50, unitPrice: 60, total: 3000 }], totalAmount: 3000, status: 'shipped', paymentStatus: 'partial', orderDate: '2024-01-10', expectedDeliveryDate: '2024-01-15', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: '3', supplierId: '1', branchId: '2', orderNumber: 'ORD-2024-003', items: [{ productId: '2', productName: 'أموكسيسيللين 500 مجم', quantity: 200, unitPrice: 32, total: 6400 }], totalAmount: 6400, status: 'pending', paymentStatus: 'unpaid', orderDate: '2024-01-12', expectedDeliveryDate: '2024-01-18', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ],
   settings: {
     companyName: 'صيدليات النادي',
     currency: 'EGP',
@@ -289,6 +294,54 @@ class LocalDatabase {
   deleteProduct(id: string) {
     if (this.data.products) {
       this.data.products = this.data.products.filter(p => p.id !== id);
+      this.saveToStorage(this.data);
+    }
+  }
+
+  // ==================== الطلبات ====================
+  getOrders(): DatabaseSchema['orders'] {
+    return [...(this.data.orders || [])];
+  }
+
+  getOrder(id: string) {
+    return (this.data.orders || []).find(o => o.id === id);
+  }
+
+  addOrder(order: Omit<DatabaseSchema['orders'][0], 'id' | 'createdAt' | 'updatedAt'>) {
+    if (!this.data.orders) {
+      this.data.orders = [];
+    }
+    const newOrder = {
+      ...order,
+      id: this.generateId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.data.orders.push(newOrder);
+    this.saveToStorage(this.data);
+    return newOrder;
+  }
+
+  updateOrder(id: string, updates: Partial<DatabaseSchema['orders'][0]>) {
+    if (!this.data.orders) {
+      this.data.orders = [];
+    }
+    const index = this.data.orders.findIndex(o => o.id === id);
+    if (index !== -1) {
+      this.data.orders[index] = {
+        ...this.data.orders[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      this.saveToStorage(this.data);
+      return this.data.orders[index];
+    }
+    return null;
+  }
+
+  deleteOrder(id: string) {
+    if (this.data.orders) {
+      this.data.orders = this.data.orders.filter(o => o.id !== id);
       this.saveToStorage(this.data);
     }
   }

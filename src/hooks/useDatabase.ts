@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { db } from '@/lib/database';
-import { Branch, Supplier, License, Employee, Product, BackupData } from '@/lib/database/types';
+import { Branch, Supplier, License, Employee, Product, Order, BackupData } from '@/lib/database/types';
 import { toast } from '@/hooks/use-toast';
 
 export function useDatabase() {
@@ -128,6 +128,30 @@ export function useDatabase() {
     toast({ title: 'تم حذف الصنف بنجاح', variant: 'default' });
   }, []);
 
+  // ==================== الطلبات ====================
+  const getOrders = useCallback(() => {
+    return db.getOrders();
+  }, []);
+
+  const addOrder = useCallback((order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newOrder = db.addOrder(order);
+    toast({ title: 'تم إضافة الطلب بنجاح', variant: 'default' });
+    return newOrder;
+  }, []);
+
+  const updateOrder = useCallback((id: string, updates: Partial<Order>) => {
+    const updated = db.updateOrder(id, updates);
+    if (updated) {
+      toast({ title: 'تم تحديث الطلب بنجاح', variant: 'default' });
+    }
+    return updated;
+  }, []);
+
+  const deleteOrder = useCallback((id: string) => {
+    db.deleteOrder(id);
+    toast({ title: 'تم حذف الطلب بنجاح', variant: 'default' });
+  }, []);
+
   // ==================== الإحصائيات ====================
   const getStats = useCallback(() => {
     return db.getStats();
@@ -209,6 +233,11 @@ export function useDatabase() {
     addProduct,
     updateProduct,
     deleteProduct,
+    // الطلبات
+    getOrders,
+    addOrder,
+    updateOrder,
+    deleteOrder,
     // الإحصائيات
     getStats,
     // المصادقة
