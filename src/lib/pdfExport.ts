@@ -1,13 +1,6 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Branch, Employee, Supplier, License } from './database/types';
-
-// Extend jsPDF type for autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
 
 interface ReportData {
   branches: Branch[];
@@ -95,7 +88,7 @@ export const exportReportToPDF = (data: ReportData): void => {
       ['Total Employees', String(data.stats.totalEmployees), 'Total Sales', formatCurrency(data.stats.totalSales)],
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [],
       body: overviewData,
@@ -138,7 +131,7 @@ export const exportReportToPDF = (data: ReportData): void => {
         branch.status === 'active' ? 'Active' : 'Inactive'
       ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['#', 'Branch Name', 'Manager', 'Employees', 'Monthly Sales', 'Status']],
       body: branchesData,
@@ -182,7 +175,7 @@ export const exportReportToPDF = (data: ReportData): void => {
         formatCurrency(emp.salary + emp.allowances - emp.deductions)
       ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['#', 'Name', 'Position', 'Salary', 'Allowances', 'Deductions', 'Net']],
       body: employeesData,
@@ -248,7 +241,7 @@ export const exportReportToPDF = (data: ReportData): void => {
         ];
       });
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['#', 'Branch', 'Sales', 'Percentage']],
       body: salesData,
