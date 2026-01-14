@@ -88,7 +88,7 @@ export default function Reports() {
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
-      exportReportToPDF({
+      await exportReportToPDF({
         branches,
         employees,
         suppliers,
@@ -109,9 +109,10 @@ export default function Reports() {
         description: "تم تحميل ملف PDF للتقرير",
       });
     } catch (error) {
+      console.error('PDF Export Error:', error);
       toast({
         title: "خطأ في التصدير",
-        description: "حدث خطأ أثناء تصدير التقرير",
+        description: "حدث خطأ أثناء تصدير التقرير. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
     } finally {
