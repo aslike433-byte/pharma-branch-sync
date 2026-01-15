@@ -1,5 +1,6 @@
-import { Bell, Menu, ArrowRight } from "lucide-react";
+import { Menu, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { LicenseAlertsBadge } from "@/components/alerts/LicenseAlertsBadge";
 
 interface HeaderProps {
   title: string;
@@ -33,12 +34,7 @@ export function Header({ title, showNotifications = true, showBack = false, onMe
         <h1 className="text-lg font-bold">{title}</h1>
 
         <div className="flex items-center gap-2">
-          {showNotifications && (
-            <button className="relative p-2 rounded-xl hover:bg-muted transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-            </button>
-          )}
+          {showNotifications && <LicenseAlertsBadge />}
           <Link to="/profile" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
             <span className="text-sm font-semibold text-primary">أ</span>
           </Link>
