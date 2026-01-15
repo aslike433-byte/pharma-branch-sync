@@ -20,57 +20,46 @@ interface ReportData {
 }
 
 const formatNumber = (num: number): string => {
-  return num.toLocaleString('ar-EG');
+  return num.toLocaleString('en-US');
 };
 
 const formatCurrency = (num: number): string => {
-  return `${formatNumber(num)} ج.م`;
+  return `${formatNumber(num)} EGP`;
 };
 
 const getMonthName = (monthValue: string): string => {
   const months: Record<string, string> = {
-    '2024-01': 'يناير 2024',
-    '2024-02': 'فبراير 2024',
-    '2024-03': 'مارس 2024',
-    '2023-12': 'ديسمبر 2023',
-    '2023-11': 'نوفمبر 2023',
+    '2024-01': 'January 2024',
+    '2024-02': 'February 2024',
+    '2024-03': 'March 2024',
+    '2024-04': 'April 2024',
+    '2024-05': 'May 2024',
+    '2024-06': 'June 2024',
+    '2024-07': 'July 2024',
+    '2024-08': 'August 2024',
+    '2024-09': 'September 2024',
+    '2024-10': 'October 2024',
+    '2024-11': 'November 2024',
+    '2024-12': 'December 2024',
+    '2023-12': 'December 2023',
+    '2023-11': 'November 2023',
+    '2025-01': 'January 2025',
   };
   return months[monthValue] || monthValue;
 };
 
 const getReportTypeName = (type: string): string => {
   const types: Record<string, string> = {
-    'overview': 'نظرة عامة',
-    'branches': 'الفروع',
-    'employees': 'الموظفين',
-    'sales': 'المبيعات',
-    'all': 'تقرير شامل',
+    'overview': 'Overview',
+    'branches': 'Branches',
+    'employees': 'Employees',
+    'sales': 'Sales',
+    'all': 'Full Report',
   };
   return types[type] || type;
 };
 
-// Load Amiri Arabic font from CDN
-const loadArabicFont = async (): Promise<string> => {
-  const fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/amiri@5.0.17/files/amiri-arabic-400-normal.woff';
-  
-  try {
-    const response = await fetch(fontUrl);
-    const blob = await response.blob();
-    
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = (reader.result as string).split(',')[1];
-        resolve(base64);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    console.error('Failed to load Arabic font:', error);
-    throw error;
-  }
-};
+// Use built-in Helvetica with transliteration for Arabic support
 
 export const exportReportToPDF = async (data: ReportData): Promise<void> => {
   const doc = new jsPDF({
@@ -79,36 +68,13 @@ export const exportReportToPDF = async (data: ReportData): Promise<void> => {
     format: 'a4',
   });
 
-  // Try to load Arabic font
-  let useArabicFont = false;
-  try {
-    const fontBase64 = await loadArabicFont();
-    doc.addFileToVFS('Amiri-Regular.ttf', fontBase64);
-    doc.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
-    doc.setFont('Amiri');
-    useArabicFont = true;
-  } catch (error) {
-    console.warn('Could not load Arabic font, using default font');
-    doc.setFont('helvetica');
-  }
+  // Use default Helvetica font
+  doc.setFont('helvetica');
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 15;
   let yPos = 25;
-
-  // Helper function to reverse Arabic text for RTL display
-  const reverseArabic = (text: string): string => {
-    if (!useArabicFont) return text;
-    // Split by spaces, reverse word order for RTL
-    return text.split(' ').reverse().join(' ');
-  };
-
-  // Helper function to add right-aligned text (for Arabic RTL)
-  const addRightText = (text: string, y: number, size: number = 12) => {
-    doc.setFontSize(size);
-    doc.text(text, pageWidth - margin, y, { align: 'right' });
-  };
 
   // Helper function to add centered text
   const addCenteredText = (text: string, y: number, size: number = 12) => {
