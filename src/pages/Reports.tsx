@@ -50,6 +50,7 @@ const reportTypes = [
   { id: "branches", label: "الفروع", icon: Building2 },
   { id: "sales", label: "المبيعات", icon: DollarSign },
   { id: "employees", label: "الموظفين", icon: Users },
+  { id: "licenses", label: "التراخيص", icon: FileText },
 ];
 
 export default function Reports() {
@@ -497,6 +498,96 @@ export default function Reports() {
                       </span>
                     </div>
                   ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Licenses Report */}
+        {activeReport === "licenses" && (
+          <div className="space-y-4 animate-fade-in">
+            {/* License Stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="pharma-card p-4 border-t-4 border-t-success">
+                <p className="text-xs text-muted-foreground mb-1">سارية</p>
+                <p className="text-2xl font-bold text-success">{validLicenses}</p>
+              </div>
+              <div className="pharma-card p-4 border-t-4 border-t-warning">
+                <p className="text-xs text-muted-foreground mb-1">تنتهي قريباً</p>
+                <p className="text-2xl font-bold text-warning">{expiringLicenses}</p>
+              </div>
+              <div className="pharma-card p-4 border-t-4 border-t-destructive">
+                <p className="text-xs text-muted-foreground mb-1">منتهية</p>
+                <p className="text-2xl font-bold text-destructive">{expiredLicenses}</p>
+              </div>
+            </div>
+
+            {/* License Status Chart */}
+            <LicenseStatusChart licenses={licenses} />
+
+            {/* Licenses List */}
+            <div className="pharma-card p-4">
+              <h3 className="font-semibold mb-4">جميع التراخيص</h3>
+              <div className="space-y-3">
+                {licenses
+                  .sort((a, b) => {
+                    const statusOrder = { 'expired': 0, 'expiring': 1, 'valid': 2 };
+                    return statusOrder[a.status] - statusOrder[b.status];
+                  })
+                  .map((license) => {
+                    const branch = branches.find(b => b.id === license.branchId);
+                    const daysLeft = Math.ceil((new Date(license.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                    
+                    return (
+                      <div key={license.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-primary" />
+                            <p className="font-medium text-sm">{license.name}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {branch?.name || 'غير محدد'} • {license.licenseNumber}
+                          </p>
+                        </div>
+                        <div className="text-left">
+                          <span className={cn(
+                            "text-xs px-2 py-1 rounded-full",
+                            license.status === 'valid' && "bg-success/10 text-success",
+                            license.status === 'expiring' && "bg-warning/10 text-warning",
+                            license.status === 'expired' && "bg-destructive/10 text-destructive"
+                          )}>
+                            {license.status === 'valid' ? 'سارية' : license.status === 'expiring' ? 'تنتهي قريباً' : 'منتهية'}
+                          </span>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {daysLeft > 0 ? `${daysLeft} يوم متبقي` : daysLeft === 0 ? 'تنتهي اليوم' : `منتهية منذ ${Math.abs(daysLeft)} يوم`}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* License Types Summary */}
+            <div className="pharma-card p-4">
+              <h3 className="font-semibold mb-4">ملخص أنواع التراخيص</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center p-3 rounded-xl bg-muted/50">
+                  <p className="text-xs text-muted-foreground">تراخيص الصيدليات</p>
+                  <p className="text-xl font-bold">{licenses.filter(l => l.type === 'pharmacy').length}</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-muted/50">
+                  <p className="text-xs text-muted-foreground">تراخيص الموظفين</p>
+                  <p className="text-xl font-bold">{licenses.filter(l => l.type === 'employee').length}</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-muted/50">
+                  <p className="text-xs text-muted-foreground">تراخيص الصيانة</p>
+                  <p className="text-xl font-bold">{licenses.filter(l => l.type === 'maintenance').length}</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-muted/50">
+                  <p className="text-xs text-muted-foreground">التراخيص الصحية</p>
+                  <p className="text-xl font-bold">{licenses.filter(l => l.type === 'health').length}</p>
+                </div>
               </div>
             </div>
           </div>

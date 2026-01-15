@@ -54,9 +54,44 @@ const getReportTypeName = (type: string): string => {
     'branches': 'Branches',
     'employees': 'Employees',
     'sales': 'Sales',
+    'licenses': 'Licenses',
     'all': 'Full Report',
   };
   return types[type] || type;
+};
+
+const getLicenseTypeName = (type: string): string => {
+  const types: Record<string, string> = {
+    'pharmacy': 'Pharmacy License',
+    'employee': 'Employee License',
+    'maintenance': 'Maintenance License',
+    'health': 'Health License',
+  };
+  return types[type] || type;
+};
+
+const getLicenseStatusName = (status: string): string => {
+  const statuses: Record<string, string> = {
+    'valid': 'Valid',
+    'expiring': 'Expiring Soon',
+    'expired': 'Expired',
+  };
+  return statuses[status] || status;
+};
+
+const formatDate = (dateString: string): string => {
+  try {
+    return new Date(dateString).toLocaleDateString('en-GB');
+  } catch {
+    return dateString;
+  }
+};
+
+const getDaysUntilExpiry = (expiryDate: string): number => {
+  const expiry = new Date(expiryDate);
+  const today = new Date();
+  const diffTime = expiry.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 // Use built-in Helvetica with transliteration for Arabic support
@@ -379,6 +414,114 @@ export const exportReportToPDF = async (data: ReportData): Promise<void> => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.text(`Total Sales: ${formatCurrency(totalSales)}`, pageWidth / 2, yPos + 13, { align: 'center' });
+  }
+
+  // Licenses Report
+  if (data.reportType === 'licenses' || data.reportType === 'all') {
+    if (yPos > 180) {
+      doc.addPage();
+      yPos = 25;
+    }
+
+    doc.setFontSize(16);
+    doc.setTextColor(0, 102, 153);
+    doc.text('Licenses Report', margin, yPos);
+    yPos += 8;
+
+    // Get branch names for mapping
+    const branchMap = new Map(data.branches.map(b => [b.id, b.name]));
+
+    const licensesData = data.licenses
+      .sort((a, b) => {
+        // Sort by status priority: expired first, then expiring, then valid
+        const statusOrder = { 'expired': 0, 'expiring': 1, 'valid': 2 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      })
+      .map((license, index) => {
+        const daysLeft = getDaysUntilExpiry(license.expiryDate);
+        const daysText = daysLeft < 0 
+          ? `Expired ${Math.abs(daysLeft)} days ago` 
+          : daysLeft === 0 
+            ? 'Expires today' 
+            : `${daysLeft} days left`;
+        
+        return [
+          String(index + 1),
+          license.name,
+          getLicenseTypeName(license.type),
+          license.licenseNumber,
+          branchMap.get(license.branchId) || 'N/A',
+          formatDate(license.expiryDate),
+          getLicenseStatusName(license.status),
+        ];
+      });
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [['#', 'License Name', 'Type', 'Number', 'Branch', 'Expiry Date', 'Status']],
+      body: licensesData,
+      theme: 'striped',
+      headStyles: { ...headStyles, fontSize: 8 },
+      styles: { ...tableStyles, fontSize: 7 },
+      margin: { left: margin, right: margin },
+      columnStyles: {
+        0: { cellWidth: 8 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 28 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 28 },
+        5: { cellWidth: 22 },
+        6: { cellWidth: 22 },
+      },
+      didParseCell: (data) => {
+        // Color code status cells
+        if (data.column.index === 6 && data.section === 'body') {
+          const status = data.cell.raw as string;
+          if (status === 'Valid') {
+            data.cell.styles.textColor = [34, 139, 34]; // Green
+          } else if (status === 'Expiring Soon') {
+            data.cell.styles.textColor = [255, 140, 0]; // Orange
+          } else if (status === 'Expired') {
+            data.cell.styles.textColor = [220, 20, 60]; // Red
+          }
+        }
+      },
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 10;
+
+    // License summary
+    const validLicenses = data.licenses.filter(l => l.status === 'valid').length;
+    const expiringLicenses = data.licenses.filter(l => l.status === 'expiring').length;
+    const expiredLicenses = data.licenses.filter(l => l.status === 'expired').length;
+
+    doc.setFillColor(245, 245, 245);
+    doc.roundedRect(margin, yPos, pageWidth - (margin * 2), 40, 3, 3, 'F');
+
+    doc.setFontSize(12);
+    doc.setTextColor(0, 102, 153);
+    yPos += 10;
+    doc.text('License Summary', margin + 5, yPos);
+    
+    yPos += 10;
+    doc.setFontSize(10);
+    
+    // Valid
+    doc.setTextColor(34, 139, 34);
+    doc.text(`Valid: ${validLicenses}`, margin + 10, yPos);
+    
+    // Expiring
+    doc.setTextColor(255, 140, 0);
+    doc.text(`Expiring Soon: ${expiringLicenses}`, margin + 55, yPos);
+    
+    // Expired
+    doc.setTextColor(220, 20, 60);
+    doc.text(`Expired: ${expiredLicenses}`, margin + 115, yPos);
+
+    yPos += 10;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.text(`Total Licenses: ${data.licenses.length}`, margin + 10, yPos);
   }
 
   // Footer on all pages
