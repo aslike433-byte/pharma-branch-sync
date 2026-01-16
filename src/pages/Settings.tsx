@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { 
   ArrowRight, 
   Camera, 
@@ -18,19 +18,41 @@ import {
   RotateCcw,
   Moon,
   Sun,
-  Monitor
+  Monitor,
+  FileArchive
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useDatabase } from "@/hooks/useDatabase";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/hooks/useTheme";
+import { exportProjectAsZip } from "@/lib/projectExport";
 
 export default function Settings() {
   const navigate = useNavigate();
   const { createBackup, restoreBackup, resetDatabase, isLoading } = useDatabase();
   const { theme, setTheme, isDark, isSystem } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportZip = async () => {
+    setIsExporting(true);
+    try {
+      const info = await exportProjectAsZip();
+      toast({
+        title: "تم تصدير المشروع بنجاح",
+        description: `تم تصدير ${info.totalProducts} منتج، ${info.totalBranches} فرع، ${info.totalLicenses} ترخيص`,
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في التصدير",
+        description: "حدث خطأ أثناء تصدير المشروع",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleRestoreClick = () => {
     fileInputRef.current?.click();
@@ -120,9 +142,21 @@ export default function Settings() {
         {/* Backup Section */}
         <section className="space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide px-1">
-            النسخ الاحتياطي
+            النسخ الاحتياطي والتصدير
           </h3>
           <div className="pharma-card divide-y divide-border">
+            <button 
+              onClick={handleExportZip}
+              disabled={isExporting}
+              className="w-full"
+            >
+              <SettingsItem
+                icon={FileArchive}
+                title="تصدير المشروع كـ ZIP"
+                subtitle="تحميل جميع الملفات والبيانات"
+                hasArrow
+              />
+            </button>
             <button 
               onClick={createBackup}
               disabled={isLoading}
