@@ -49,11 +49,11 @@ export function BranchSalesChart({ branches }: BranchSalesChartProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ left: 10, right: 20 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-            <XAxis type="number" tick={{ fontSize: 12 }} />
+            <XAxis type="number" tick={{ fontSize: 12, fontFamily: 'Noto Sans Arabic, sans-serif' }} />
             <YAxis 
               dataKey="name" 
               type="category" 
-              tick={{ fontSize: 11 }} 
+              tick={{ fontSize: 11, fontFamily: 'Noto Sans Arabic, sans-serif' }} 
               width={70}
             />
             <Tooltip
@@ -172,8 +172,8 @@ export function MonthlySalesTrend({ currentSales }: MonthlySalesTrendProps) {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 10 }} />
+            <XAxis dataKey="month" tick={{ fontSize: 10, fontFamily: 'Noto Sans Arabic, sans-serif' }} />
+            <YAxis tick={{ fontSize: 10, fontFamily: 'Noto Sans Arabic, sans-serif' }} />
             <Tooltip
               contentStyle={{
                 backgroundColor: "hsl(var(--card))",
@@ -221,8 +221,8 @@ export function EmployeeSalaryChart({ employees }: EmployeeSalaryChartProps) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 10 }} />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fontFamily: 'Noto Sans Arabic, sans-serif' }} />
+            <YAxis tick={{ fontSize: 10, fontFamily: 'Noto Sans Arabic, sans-serif' }} />
             <Tooltip
               contentStyle={{
                 backgroundColor: "hsl(var(--card))",
@@ -333,8 +333,8 @@ export function EmployeesByBranchChart({ branches }: EmployeesByBranchChartProps
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-            <YAxis tick={{ fontSize: 10 }} />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fontFamily: 'Noto Sans Arabic, sans-serif' }} />
+            <YAxis tick={{ fontSize: 10, fontFamily: 'Noto Sans Arabic, sans-serif' }} />
             <Tooltip
               contentStyle={{
                 backgroundColor: "hsl(var(--card))",
