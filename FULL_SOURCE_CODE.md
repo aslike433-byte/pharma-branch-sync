@@ -1,7 +1,7 @@
 # PharmaLife - كود المصدر الكامل
 ## نظام إدارة الصيدليات
 
-تاريخ الإنشاء: 2026-01-16
+تاريخ التحديث: 2026-02-06
 
 ---
 
@@ -12,6 +12,8 @@
 4. [الصفحات](#الصفحات)
 5. [المكونات](#المكونات)
 6. [Hooks](#hooks)
+7. [المكتبات المساعدة](#المكتبات-المساعدة)
+8. [الأنماط](#الأنماط)
 
 ---
 
@@ -42,33 +44,146 @@
 </html>
 ```
 
-### vite.config.ts
+### tailwind.config.ts
 ```typescript
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import type { Config } from "tailwindcss";
 
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+export default {
+  darkMode: ["class"],
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "1rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      fontFamily: {
+        arabic: ['"Noto Sans Arabic"', 'system-ui', 'sans-serif'],
+      },
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+        xl: "1rem",
+        "2xl": "1.25rem",
+        "3xl": "1.5rem",
+      },
+      boxShadow: {
+        'card': 'var(--shadow-card)',
+        'soft': 'var(--shadow-md)',
+        'glow': '0 0 20px hsl(var(--primary) / 0.3)',
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+      },
     },
   },
-}));
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config;
 ```
 
 ---
 
 ## الملف الرئيسي
 
+### src/main.tsx
+```tsx
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+
+createRoot(document.getElementById("root")!).render(<App />);
+```
+
 ### src/App.tsx
-```typescript
+```tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -86,7 +201,6 @@ import Payroll from "./pages/Payroll";
 import Inventory from "./pages/Inventory";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -120,14 +234,24 @@ const App = () => (
 export default App;
 ```
 
+### src/components/ThemeProvider.tsx
+```tsx
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import * as React from "react";
+
+type ThemeProviderProps = React.ComponentProps<typeof NextThemesProvider>;
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+```
+
 ---
 
 ## قاعدة البيانات
 
 ### src/lib/database/types.ts
 ```typescript
-// أنواع البيانات الأساسية للنظام
-
 export interface Branch {
   id: string;
   name: string;
@@ -280,16 +404,19 @@ export interface BackupData {
 }
 ```
 
+### src/lib/database/index.ts
+```typescript
+export { db } from './localStorage';
+export * from './types';
+```
+
 ### src/lib/database/localStorage.ts
 ```typescript
-// خدمة قاعدة البيانات المحلية
-
 import { DatabaseSchema, BackupData } from './types';
 
 const DB_KEY = 'pharmalife_db';
 const DB_VERSION = '1.0.0';
 
-// البيانات الافتراضية
 const defaultData: DatabaseSchema = {
   branches: [
     { id: '1', name: 'فرع المعادي', address: 'شارع 9 - المعادي', phone: '01012345678', manager: 'أحمد محمد', status: 'active', monthlySales: 125000, employeesCount: 8, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -373,326 +500,167 @@ class LocalDatabase {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
-  // ==================== الفروع ====================
-  getBranches(): DatabaseSchema['branches'] {
-    return [...this.data.branches];
-  }
-
-  getBranch(id: string) {
-    return this.data.branches.find(b => b.id === id);
-  }
-
+  // الفروع
+  getBranches() { return [...this.data.branches]; }
+  getBranch(id: string) { return this.data.branches.find(b => b.id === id); }
   addBranch(branch: Omit<DatabaseSchema['branches'][0], 'id' | 'createdAt' | 'updatedAt'>) {
-    const newBranch = {
-      ...branch,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const newBranch = { ...branch, id: this.generateId(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     this.data.branches.push(newBranch);
     this.saveToStorage(this.data);
     return newBranch;
   }
-
   updateBranch(id: string, updates: Partial<DatabaseSchema['branches'][0]>) {
     const index = this.data.branches.findIndex(b => b.id === id);
     if (index !== -1) {
-      this.data.branches[index] = {
-        ...this.data.branches[index],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      this.data.branches[index] = { ...this.data.branches[index], ...updates, updatedAt: new Date().toISOString() };
       this.saveToStorage(this.data);
       return this.data.branches[index];
     }
     return null;
   }
+  deleteBranch(id: string) { this.data.branches = this.data.branches.filter(b => b.id !== id); this.saveToStorage(this.data); }
 
-  deleteBranch(id: string) {
-    this.data.branches = this.data.branches.filter(b => b.id !== id);
-    this.saveToStorage(this.data);
-  }
-
-  // ==================== الموردين ====================
-  getSuppliers(): DatabaseSchema['suppliers'] {
-    return [...this.data.suppliers];
-  }
-
-  getSupplier(id: string) {
-    return this.data.suppliers.find(s => s.id === id);
-  }
-
+  // الموردين
+  getSuppliers() { return [...this.data.suppliers]; }
+  getSupplier(id: string) { return this.data.suppliers.find(s => s.id === id); }
   addSupplier(supplier: Omit<DatabaseSchema['suppliers'][0], 'id' | 'createdAt' | 'updatedAt'>) {
-    const newSupplier = {
-      ...supplier,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const newSupplier = { ...supplier, id: this.generateId(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     this.data.suppliers.push(newSupplier);
     this.saveToStorage(this.data);
     return newSupplier;
   }
-
   updateSupplier(id: string, updates: Partial<DatabaseSchema['suppliers'][0]>) {
     const index = this.data.suppliers.findIndex(s => s.id === id);
     if (index !== -1) {
-      this.data.suppliers[index] = {
-        ...this.data.suppliers[index],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      this.data.suppliers[index] = { ...this.data.suppliers[index], ...updates, updatedAt: new Date().toISOString() };
       this.saveToStorage(this.data);
       return this.data.suppliers[index];
     }
     return null;
   }
+  deleteSupplier(id: string) { this.data.suppliers = this.data.suppliers.filter(s => s.id !== id); this.saveToStorage(this.data); }
 
-  deleteSupplier(id: string) {
-    this.data.suppliers = this.data.suppliers.filter(s => s.id !== id);
-    this.saveToStorage(this.data);
-  }
-
-  // ==================== التراخيص ====================
-  getLicenses(): DatabaseSchema['licenses'] {
-    return [...this.data.licenses];
-  }
-
-  getLicense(id: string) {
-    return this.data.licenses.find(l => l.id === id);
-  }
-
+  // التراخيص
+  getLicenses() { return [...this.data.licenses]; }
+  getLicense(id: string) { return this.data.licenses.find(l => l.id === id); }
   addLicense(license: Omit<DatabaseSchema['licenses'][0], 'id' | 'createdAt' | 'updatedAt'>) {
-    const newLicense = {
-      ...license,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const newLicense = { ...license, id: this.generateId(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     this.data.licenses.push(newLicense);
     this.saveToStorage(this.data);
     return newLicense;
   }
-
   updateLicense(id: string, updates: Partial<DatabaseSchema['licenses'][0]>) {
     const index = this.data.licenses.findIndex(l => l.id === id);
     if (index !== -1) {
-      this.data.licenses[index] = {
-        ...this.data.licenses[index],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      this.data.licenses[index] = { ...this.data.licenses[index], ...updates, updatedAt: new Date().toISOString() };
       this.saveToStorage(this.data);
       return this.data.licenses[index];
     }
     return null;
   }
+  deleteLicense(id: string) { this.data.licenses = this.data.licenses.filter(l => l.id !== id); this.saveToStorage(this.data); }
 
-  deleteLicense(id: string) {
-    this.data.licenses = this.data.licenses.filter(l => l.id !== id);
-    this.saveToStorage(this.data);
-  }
-
-  // ==================== الموظفين ====================
-  getEmployees(): DatabaseSchema['employees'] {
-    return [...this.data.employees];
-  }
-
-  getEmployee(id: string) {
-    return this.data.employees.find(e => e.id === id);
-  }
-
+  // الموظفين
+  getEmployees() { return [...this.data.employees]; }
+  getEmployee(id: string) { return this.data.employees.find(e => e.id === id); }
   addEmployee(employee: Omit<DatabaseSchema['employees'][0], 'id' | 'createdAt' | 'updatedAt'>) {
-    const newEmployee = {
-      ...employee,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const newEmployee = { ...employee, id: this.generateId(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     this.data.employees.push(newEmployee);
     this.saveToStorage(this.data);
     return newEmployee;
   }
-
   updateEmployee(id: string, updates: Partial<DatabaseSchema['employees'][0]>) {
     const index = this.data.employees.findIndex(e => e.id === id);
     if (index !== -1) {
-      this.data.employees[index] = {
-        ...this.data.employees[index],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      this.data.employees[index] = { ...this.data.employees[index], ...updates, updatedAt: new Date().toISOString() };
       this.saveToStorage(this.data);
       return this.data.employees[index];
     }
     return null;
   }
+  deleteEmployee(id: string) { this.data.employees = this.data.employees.filter(e => e.id !== id); this.saveToStorage(this.data); }
 
-  deleteEmployee(id: string) {
-    this.data.employees = this.data.employees.filter(e => e.id !== id);
-    this.saveToStorage(this.data);
-  }
-
-  // ==================== المخزون ====================
-  getProducts(): DatabaseSchema['products'] {
-    return [...(this.data.products || [])];
-  }
-
-  getProduct(id: string) {
-    return (this.data.products || []).find(p => p.id === id);
-  }
-
+  // المخزون
+  getProducts() { return [...(this.data.products || [])]; }
+  getProduct(id: string) { return (this.data.products || []).find(p => p.id === id); }
   addProduct(product: Omit<DatabaseSchema['products'][0], 'id' | 'createdAt' | 'updatedAt'>) {
-    if (!this.data.products) {
-      this.data.products = [];
-    }
-    const newProduct = {
-      ...product,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    if (!this.data.products) this.data.products = [];
+    const newProduct = { ...product, id: this.generateId(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     this.data.products.push(newProduct);
     this.saveToStorage(this.data);
     return newProduct;
   }
-
   updateProduct(id: string, updates: Partial<DatabaseSchema['products'][0]>) {
-    if (!this.data.products) {
-      this.data.products = [];
-    }
+    if (!this.data.products) this.data.products = [];
     const index = this.data.products.findIndex(p => p.id === id);
     if (index !== -1) {
-      this.data.products[index] = {
-        ...this.data.products[index],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      this.data.products[index] = { ...this.data.products[index], ...updates, updatedAt: new Date().toISOString() };
       this.saveToStorage(this.data);
       return this.data.products[index];
     }
     return null;
   }
+  deleteProduct(id: string) { if (this.data.products) { this.data.products = this.data.products.filter(p => p.id !== id); this.saveToStorage(this.data); } }
 
-  deleteProduct(id: string) {
-    if (this.data.products) {
-      this.data.products = this.data.products.filter(p => p.id !== id);
-      this.saveToStorage(this.data);
-    }
-  }
-
-  // ==================== الطلبات ====================
-  getOrders(): DatabaseSchema['orders'] {
-    return [...(this.data.orders || [])];
-  }
-
-  getOrder(id: string) {
-    return (this.data.orders || []).find(o => o.id === id);
-  }
-
+  // الطلبات
+  getOrders() { return [...(this.data.orders || [])]; }
+  getOrder(id: string) { return (this.data.orders || []).find(o => o.id === id); }
   addOrder(order: Omit<DatabaseSchema['orders'][0], 'id' | 'createdAt' | 'updatedAt'>) {
-    if (!this.data.orders) {
-      this.data.orders = [];
-    }
-    const newOrder = {
-      ...order,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    if (!this.data.orders) this.data.orders = [];
+    const newOrder = { ...order, id: this.generateId(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     this.data.orders.push(newOrder);
     this.saveToStorage(this.data);
     return newOrder;
   }
-
   updateOrder(id: string, updates: Partial<DatabaseSchema['orders'][0]>) {
-    if (!this.data.orders) {
-      this.data.orders = [];
-    }
+    if (!this.data.orders) this.data.orders = [];
     const index = this.data.orders.findIndex(o => o.id === id);
     if (index !== -1) {
-      this.data.orders[index] = {
-        ...this.data.orders[index],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      this.data.orders[index] = { ...this.data.orders[index], ...updates, updatedAt: new Date().toISOString() };
       this.saveToStorage(this.data);
       return this.data.orders[index];
     }
     return null;
   }
+  deleteOrder(id: string) { if (this.data.orders) { this.data.orders = this.data.orders.filter(o => o.id !== id); this.saveToStorage(this.data); } }
 
-  deleteOrder(id: string) {
-    if (this.data.orders) {
-      this.data.orders = this.data.orders.filter(o => o.id !== id);
-      this.saveToStorage(this.data);
-    }
-  }
-
-  // ==================== المبيعات ====================
-  getSales(): DatabaseSchema['sales'] {
-    return [...this.data.sales];
-  }
-
+  // المبيعات
+  getSales() { return [...this.data.sales]; }
   addSale(sale: Omit<DatabaseSchema['sales'][0], 'id' | 'createdAt' | 'updatedAt'>) {
-    const newSale = {
-      ...sale,
-      id: this.generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const newSale = { ...sale, id: this.generateId(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     this.data.sales.push(newSale);
     this.saveToStorage(this.data);
     return newSale;
   }
 
-  // ==================== المستخدمين ====================
-  getUsers(): DatabaseSchema['users'] {
-    return [...this.data.users];
-  }
-
+  // المستخدمين
+  getUsers() { return [...this.data.users]; }
   authenticateUser(username: string, password: string) {
-    return this.data.users.find(
-      u => u.username === username && u.password === password
-    );
+    return this.data.users.find(u => u.username === username && u.password === password);
   }
 
-  // ==================== الإحصائيات ====================
+  // الإحصائيات
   getStats() {
-    const activeBranches = this.data.branches.filter(b => b.status === 'active').length;
-    const totalEmployees = this.data.employees.filter(e => e.status === 'active').length;
-    const totalSales = this.data.branches.reduce((sum, b) => sum + b.monthlySales, 0);
-    const activeSuppliers = this.data.suppliers.filter(s => s.status === 'active').length;
-    const expiringLicenses = this.data.licenses.filter(l => l.status === 'expiring').length;
-    const expiredLicenses = this.data.licenses.filter(l => l.status === 'expired').length;
-
     return {
-      activeBranches,
+      activeBranches: this.data.branches.filter(b => b.status === 'active').length,
       totalBranches: this.data.branches.length,
-      totalEmployees,
-      totalSales,
-      activeSuppliers,
+      totalEmployees: this.data.employees.filter(e => e.status === 'active').length,
+      totalSales: this.data.branches.reduce((sum, b) => sum + b.monthlySales, 0),
+      activeSuppliers: this.data.suppliers.filter(s => s.status === 'active').length,
       totalSuppliers: this.data.suppliers.length,
-      expiringLicenses,
-      expiredLicenses,
+      expiringLicenses: this.data.licenses.filter(l => l.status === 'expiring').length,
+      expiredLicenses: this.data.licenses.filter(l => l.status === 'expired').length,
       totalLicenses: this.data.licenses.length,
     };
   }
 
-  // ==================== النسخ الاحتياطي ====================
+  // النسخ الاحتياطي
   createBackup(): BackupData {
-    return {
-      version: DB_VERSION,
-      createdAt: new Date().toISOString(),
-      data: { ...this.data },
-    };
+    return { version: DB_VERSION, createdAt: new Date().toISOString(), data: { ...this.data } };
   }
-
   restoreBackup(backup: BackupData): boolean {
     try {
-      if (!backup.data || !backup.version) {
-        throw new Error('ملف النسخ الاحتياطي غير صالح');
-      }
+      if (!backup.data || !backup.version) throw new Error('ملف النسخ الاحتياطي غير صالح');
       this.data = backup.data;
       this.saveToStorage(this.data);
       return true;
@@ -701,7 +669,6 @@ class LocalDatabase {
       return false;
     }
   }
-
   downloadBackup(): void {
     const backup = this.createBackup();
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -714,7 +681,6 @@ class LocalDatabase {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
-
   resetDatabase(): void {
     this.data = { ...defaultData };
     this.saveToStorage(this.data);
@@ -728,18 +694,351 @@ export const db = new LocalDatabase();
 
 ## الصفحات
 
-نظراً لحجم الكود الكبير، يمكنك تحميل الملف الكامل من المشروع أو مراجعة الملفات التالية:
+### src/pages/Login.tsx
+```tsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, User, Lock, WifiOff, Globe, LogIn } from "lucide-react";
+import { PharmaIcon } from "@/components/ui/PharmaIcon";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
-- `src/pages/Login.tsx` - صفحة تسجيل الدخول
-- `src/pages/Dashboard.tsx` - لوحة التحكم الرئيسية
-- `src/pages/Branches.tsx` - إدارة الفروع
-- `src/pages/Suppliers.tsx` - إدارة الموردين
-- `src/pages/Licenses.tsx` - إدارة التراخيص
-- `src/pages/Payroll.tsx` - إدارة الرواتب والموظفين
-- `src/pages/Inventory.tsx` - إدارة المخزون
-- `src/pages/Orders.tsx` - إدارة المشتريات
-- `src/pages/Reports.tsx` - التقارير والإحصائيات
-- `src/pages/Settings.tsx` - الإعدادات والملف الشخصي
+export default function Login() {
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (username && password) {
+      toast.success("تم تسجيل الدخول بنجاح");
+      navigate("/dashboard");
+    } else {
+      toast.error("يرجى إدخال اسم المستخدم وكلمة المرور");
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <button className="absolute top-4 right-4 z-10 p-2 rounded-full bg-card border border-border shadow-soft hover:bg-muted transition-colors">
+        <Globe className="w-5 h-5 text-muted-foreground" />
+      </button>
+      <div className="pharma-header text-primary-foreground px-6 pt-12 pb-16 rounded-b-[2.5rem] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/20 blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-40 h-40 rounded-full bg-white/20 blur-3xl" />
+        </div>
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <PharmaIcon size="xl" className="mb-4" />
+          <h1 className="text-2xl font-bold tracking-wide">ELNADY PHARMACIES</h1>
+          <p className="text-primary-foreground/80 mt-1">PharmaLife System</p>
+        </div>
+      </div>
+      <div className="flex-1 px-6 -mt-8">
+        <div className="pharma-card p-6 animate-slide-up">
+          <h2 className="text-xl font-bold text-center mb-4">تسجيل الدخول</h2>
+          <div className="offline-banner mb-6">
+            <WifiOff className="w-4 h-4" />
+            <span>وضع غير متصل بالشبكة</span>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">اسم المستخدم</label>
+              <div className="relative">
+                <Input type="text" placeholder="أدخل اسم المستخدم" value={username} onChange={(e) => setUsername(e.target.value)} className="pharma-input pl-10 pr-12" />
+                <User className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">كلمة المرور</label>
+              <div className="relative">
+                <Input type={showPassword ? "text" : "password"} placeholder="أدخل كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} className="pharma-input px-12" />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Checkbox id="remember" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(checked as boolean)} />
+                <label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">تذكرني</label>
+              </div>
+              <button type="button" className="text-sm text-primary hover:underline">نسيت كلمة المرور؟</button>
+            </div>
+            <Button type="submit" disabled={isLoading} className="w-full pharma-btn-primary h-12 text-base font-semibold rounded-xl gap-2">
+              {isLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><span>تسجيل الدخول</span><LogIn className="w-5 h-5 rotate-180" /></>}
+            </Button>
+          </form>
+          <div className="mt-8 pt-6 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground">PharmaLife v1.0.2</p>
+            <p className="text-xs text-muted-foreground mt-1">© ELNADY PHARMACIES 2024</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### src/pages/Dashboard.tsx
+```tsx
+import { Building2, Package, Users, TrendingUp, WifiOff } from "lucide-react";
+import { Header } from "@/components/layout/Header";
+import { BottomNavigation } from "@/components/layout/BottomNavigation";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { AlertsList } from "@/components/dashboard/AlertsList";
+import { BranchesOverview } from "@/components/dashboard/BranchesOverview";
+
+export default function Dashboard() {
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <Header title="لوحة التحكم" />
+      <main className="px-4 py-4 space-y-6">
+        <div className="offline-banner animate-fade-in">
+          <WifiOff className="w-4 h-4" />
+          <span>وضع غير متصل - البيانات محفوظة محليًا</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <StatsCard title="إجمالي الفروع" value="15" subtitle="فرع نشط" icon={Building2} variant="default" />
+          <StatsCard title="الأصناف" value="12,405" subtitle="صنف مسجل" icon={Package} variant="info" />
+          <StatsCard title="الموظفين" value="148" subtitle="موظف نشط" icon={Users} variant="success" />
+          <StatsCard title="المبيعات" value="1.2M" subtitle="هذا الشهر" icon={TrendingUp} trend={{ value: 12, isPositive: true }} variant="default" />
+        </div>
+        <section>
+          <h3 className="font-semibold mb-3">الوصول السريع</h3>
+          <QuickActions />
+        </section>
+        <section className="pharma-card p-4">
+          <AlertsList />
+        </section>
+        <section>
+          <BranchesOverview />
+        </section>
+      </main>
+      <BottomNavigation />
+    </div>
+  );
+}
+```
+
+### src/pages/NotFound.tsx
+```tsx
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+const NotFound = () => {
+  const location = useLocation();
+  useEffect(() => {
+    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+  }, [location.pathname]);
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted">
+      <div className="text-center">
+        <h1 className="mb-4 text-4xl font-bold">404</h1>
+        <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
+        <a href="/" className="text-primary underline hover:text-primary/90">Return to Home</a>
+      </div>
+    </div>
+  );
+};
+export default NotFound;
+```
+
+> **ملاحظة:** الصفحات التالية (Branches, Inventory, Orders, Suppliers, Licenses, Payroll, Reports, Settings) كبيرة جداً ومتاحة في ملفات المشروع مباشرة. يمكنك الاطلاع عليها من مستودع GitHub.
+
+---
+
+## المكونات
+
+### src/components/layout/Header.tsx
+```tsx
+import { Menu, ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { LicenseAlertsBadge } from "@/components/alerts/LicenseAlertsBadge";
+
+interface HeaderProps {
+  title: string;
+  showNotifications?: boolean;
+  showBack?: boolean;
+  onMenuClick?: () => void;
+}
+
+export function Header({ title, showNotifications = true, showBack = false, onMenuClick }: HeaderProps) {
+  const navigate = useNavigate();
+  return (
+    <header className="sticky top-0 z-40 bg-card border-b border-border px-4 py-3">
+      <div className="flex items-center justify-between">
+        {showBack ? (
+          <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted transition-colors">
+            <ArrowRight className="w-6 h-6" />
+          </button>
+        ) : (
+          <button onClick={onMenuClick} className="p-2 rounded-xl hover:bg-muted transition-colors">
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
+        <h1 className="text-lg font-bold">{title}</h1>
+        <div className="flex items-center gap-2">
+          {showNotifications && <LicenseAlertsBadge />}
+          <Link to="/profile" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+            <span className="text-sm font-semibold text-primary">أ</span>
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+```
+
+### src/components/layout/BottomNavigation.tsx
+```tsx
+import { Link, useLocation } from "react-router-dom";
+import { Home, Users, BarChart3, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+  { icon: Home, label: "الرئيسية", path: "/dashboard" },
+  { icon: Users, label: "الموردين", path: "/suppliers" },
+  { icon: BarChart3, label: "التقارير", path: "/reports" },
+  { icon: Settings, label: "الإعدادات", path: "/settings" },
+];
+
+export function BottomNavigation() {
+  const location = useLocation();
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50">
+      <div className="flex items-center justify-around h-16 px-2">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path || (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
+          return (
+            <Link key={item.path} to={item.path} className={cn("flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all duration-200", isActive ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
+              <item.icon className={cn("w-5 h-5", isActive && "stroke-[2.5px]")} />
+              <span className={cn("text-xs", isActive && "font-semibold")}>{item.label}</span>
+              {isActive && <div className="absolute -bottom-0 w-12 h-1 rounded-t-full bg-primary" />}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+```
+
+### src/components/dashboard/StatsCard.tsx
+```tsx
+import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
+
+interface StatsCardProps {
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  icon: LucideIcon;
+  trend?: { value: number; isPositive: boolean };
+  variant?: "default" | "success" | "warning" | "destructive" | "info";
+}
+
+const variantStyles = {
+  default: "bg-primary/10 text-primary",
+  success: "bg-success/10 text-success",
+  warning: "bg-warning/10 text-warning",
+  destructive: "bg-destructive/10 text-destructive",
+  info: "bg-info/10 text-info",
+};
+
+export function StatsCard({ title, value, subtitle, icon: Icon, trend, variant = "default" }: StatsCardProps) {
+  return (
+    <div className="pharma-card p-4 animate-slide-up">
+      <div className="flex items-start justify-between mb-3">
+        <div className={cn("p-2.5 rounded-xl", variantStyles[variant])}><Icon className="w-5 h-5" /></div>
+        {trend && (
+          <span className={cn("text-xs font-medium px-2 py-1 rounded-full", trend.isPositive ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive")}>
+            {trend.isPositive ? "+" : ""}{trend.value}%
+          </span>
+        )}
+      </div>
+      <div>
+        <p className="text-2xl font-bold">{value}</p>
+        <p className="text-sm text-muted-foreground mt-0.5">{title}</p>
+        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
+```
+
+### src/components/dashboard/QuickActions.tsx
+```tsx
+import { Link } from "react-router-dom";
+import { Building2, Package, FileCheck, Wallet, TrendingUp, ShoppingCart, Users, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const actions = [
+  { icon: Building2, label: "الفروع", path: "/branches", color: "bg-primary/10 text-primary" },
+  { icon: Package, label: "الأصناف", path: "/inventory", color: "bg-info/10 text-info" },
+  { icon: FileCheck, label: "التراخيص", path: "/licenses", color: "bg-warning/10 text-warning" },
+  { icon: Wallet, label: "الرواتب", path: "/payroll", color: "bg-success/10 text-success" },
+  { icon: TrendingUp, label: "المبيعات", path: "/sales", color: "bg-accent/10 text-accent" },
+  { icon: ShoppingCart, label: "المشتريات", path: "/orders", color: "bg-destructive/10 text-destructive" },
+  { icon: Users, label: "الموردين", path: "/suppliers", color: "bg-info/10 text-info" },
+  { icon: Settings, label: "الإعدادات", path: "/settings", color: "bg-muted text-muted-foreground" },
+];
+
+export function QuickActions() {
+  return (
+    <div className="grid grid-cols-4 gap-3">
+      {actions.map((action, index) => (
+        <Link key={action.path} to={action.path} className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-soft transition-all duration-200 animate-slide-up" style={{ animationDelay: `${index * 50}ms` }}>
+          <div className={cn("p-3 rounded-xl", action.color)}><action.icon className="w-5 h-5" /></div>
+          <span className="text-xs font-medium text-center">{action.label}</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+```
+
+### src/components/ui/PharmaIcon.tsx
+```tsx
+import { cn } from "@/lib/utils";
+
+interface PharmaIconProps { className?: string; size?: "sm" | "md" | "lg" | "xl"; }
+const sizeClasses = { sm: "w-8 h-8", md: "w-12 h-12", lg: "w-16 h-16", xl: "w-24 h-24" };
+
+export function PharmaIcon({ className, size = "md" }: PharmaIconProps) {
+  return (
+    <div className={cn("flex items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm", sizeClasses[size], className)}>
+      <svg viewBox="0 0 24 24" fill="none" className="w-2/3 h-2/3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="3" fill="currentColor" opacity="0.2" />
+        <path d="M12 8v8" stroke="currentColor" strokeWidth="2.5" />
+        <path d="M8 12h8" stroke="currentColor" strokeWidth="2.5" />
+      </svg>
+    </div>
+  );
+}
+```
+
+### src/lib/utils.ts
+```typescript
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+> **ملاحظة:** باقي المكونات (Modals, Charts, Alerts, BranchesOverview, AlertsList) وصفحات (Branches, Inventory, Orders, Suppliers, Licenses, Payroll, Reports, Settings) متاحة في ملفات المشروع مباشرة. يمكنك الحصول عليها عبر ربط المشروع بـ GitHub.
 
 ---
 
@@ -758,65 +1057,356 @@ export function useDatabase() {
   const getBranches = useCallback(() => db.getBranches(), []);
   const addBranch = useCallback((branch: Omit<Branch, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newBranch = db.addBranch(branch);
-    toast({ title: 'تم إضافة الفرع بنجاح', variant: 'default' });
+    toast({ title: 'تم إضافة الفرع بنجاح' });
     return newBranch;
   }, []);
-  // ... المزيد من الدوال
+  const updateBranch = useCallback((id: string, updates: Partial<Branch>) => {
+    const updated = db.updateBranch(id, updates);
+    if (updated) toast({ title: 'تم تحديث الفرع بنجاح' });
+    return updated;
+  }, []);
+  const deleteBranch = useCallback((id: string) => { db.deleteBranch(id); toast({ title: 'تم حذف الفرع بنجاح' }); }, []);
+
+  const getSuppliers = useCallback(() => db.getSuppliers(), []);
+  const addSupplier = useCallback((supplier: Omit<Supplier, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newSupplier = db.addSupplier(supplier);
+    toast({ title: 'تم إضافة المورد بنجاح' });
+    return newSupplier;
+  }, []);
+  const updateSupplier = useCallback((id: string, updates: Partial<Supplier>) => {
+    const updated = db.updateSupplier(id, updates);
+    if (updated) toast({ title: 'تم تحديث المورد بنجاح' });
+    return updated;
+  }, []);
+  const deleteSupplier = useCallback((id: string) => { db.deleteSupplier(id); toast({ title: 'تم حذف المورد بنجاح' }); }, []);
+
+  const getLicenses = useCallback(() => db.getLicenses(), []);
+  const addLicense = useCallback((license: Omit<License, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newLicense = db.addLicense(license);
+    toast({ title: 'تم إضافة الترخيص بنجاح' });
+    return newLicense;
+  }, []);
+  const updateLicense = useCallback((id: string, updates: Partial<License>) => {
+    const updated = db.updateLicense(id, updates);
+    if (updated) toast({ title: 'تم تحديث الترخيص بنجاح' });
+    return updated;
+  }, []);
+  const deleteLicense = useCallback((id: string) => { db.deleteLicense(id); toast({ title: 'تم حذف الترخيص بنجاح' }); }, []);
+
+  const getEmployees = useCallback(() => db.getEmployees(), []);
+  const addEmployee = useCallback((employee: Omit<Employee, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newEmployee = db.addEmployee(employee);
+    toast({ title: 'تم إضافة الموظف بنجاح' });
+    return newEmployee;
+  }, []);
+  const updateEmployee = useCallback((id: string, updates: Partial<Employee>) => {
+    const updated = db.updateEmployee(id, updates);
+    if (updated) toast({ title: 'تم تحديث بيانات الموظف بنجاح' });
+    return updated;
+  }, []);
+  const deleteEmployee = useCallback((id: string) => { db.deleteEmployee(id); toast({ title: 'تم حذف الموظف بنجاح' }); }, []);
+
+  const getProducts = useCallback(() => db.getProducts(), []);
+  const addProduct = useCallback((product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newProduct = db.addProduct(product);
+    toast({ title: 'تم إضافة الصنف بنجاح' });
+    return newProduct;
+  }, []);
+  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
+    const updated = db.updateProduct(id, updates);
+    if (updated) toast({ title: 'تم تحديث الصنف بنجاح' });
+    return updated;
+  }, []);
+  const deleteProduct = useCallback((id: string) => { db.deleteProduct(id); toast({ title: 'تم حذف الصنف بنجاح' }); }, []);
+
+  const getOrders = useCallback(() => db.getOrders(), []);
+  const addOrder = useCallback((order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newOrder = db.addOrder(order);
+    toast({ title: 'تم إضافة الطلب بنجاح' });
+    return newOrder;
+  }, []);
+  const updateOrder = useCallback((id: string, updates: Partial<Order>) => {
+    const updated = db.updateOrder(id, updates);
+    if (updated) toast({ title: 'تم تحديث الطلب بنجاح' });
+    return updated;
+  }, []);
+  const deleteOrder = useCallback((id: string) => { db.deleteOrder(id); toast({ title: 'تم حذف الطلب بنجاح' }); }, []);
+
+  const getStats = useCallback(() => db.getStats(), []);
+  const authenticateUser = useCallback((username: string, password: string) => db.authenticateUser(username, password), []);
+
+  const createBackup = useCallback(() => {
+    setIsLoading(true);
+    try { db.downloadBackup(); toast({ title: 'تم إنشاء النسخة الاحتياطية بنجاح' }); }
+    catch { toast({ title: 'خطأ في إنشاء النسخة الاحتياطية', variant: 'destructive' }); }
+    finally { setIsLoading(false); }
+  }, []);
+
+  const restoreBackup = useCallback((file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setIsLoading(true);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const backup = JSON.parse(e.target?.result as string) as BackupData;
+          const success = db.restoreBackup(backup);
+          if (success) { toast({ title: 'تم استعادة النسخة الاحتياطية بنجاح' }); resolve(true); }
+          else { toast({ title: 'ملف النسخ الاحتياطي غير صالح', variant: 'destructive' }); resolve(false); }
+        } catch { toast({ title: 'خطأ في قراءة ملف النسخ الاحتياطي', variant: 'destructive' }); resolve(false); }
+        finally { setIsLoading(false); }
+      };
+      reader.readAsText(file);
+    });
+  }, []);
+
+  const resetDatabase = useCallback(() => { db.resetDatabase(); toast({ title: 'تم إعادة تعيين قاعدة البيانات' }); }, []);
 
   return {
-    isLoading,
-    getBranches,
-    addBranch,
-    // ... المزيد
+    isLoading, getBranches, addBranch, updateBranch, deleteBranch,
+    getSuppliers, addSupplier, updateSupplier, deleteSupplier,
+    getLicenses, addLicense, updateLicense, deleteLicense,
+    getEmployees, addEmployee, updateEmployee, deleteEmployee,
+    getProducts, addProduct, updateProduct, deleteProduct,
+    getOrders, addOrder, updateOrder, deleteOrder,
+    getStats, authenticateUser, createBackup, restoreBackup, resetDatabase,
   };
 }
 ```
 
-### src/hooks/useLicenseAlerts.ts
+### src/hooks/useTheme.ts
 ```typescript
-import { useEffect, useCallback, useState } from 'react';
-import { useDatabase } from './useDatabase';
-import { License } from '@/lib/database/types';
-import { toast } from '@/hooks/use-toast';
+import { useTheme as useNextTheme } from "next-themes";
 
-interface LicenseAlert {
-  id: string;
-  license: License;
-  type: 'expired' | 'expiring_soon' | 'expiring_week';
-  daysLeft: number;
-  message: string;
+export function useTheme() {
+  const { theme, setTheme, systemTheme, resolvedTheme } = useNextTheme();
+  const isDark = resolvedTheme === "dark";
+  const isLight = resolvedTheme === "light";
+  const isSystem = theme === "system";
+  const toggleTheme = () => { if (isDark) setTheme("light"); else setTheme("dark"); };
+  return { theme, setTheme, systemTheme, resolvedTheme, isDark, isLight, isSystem, toggleTheme };
 }
+```
 
-export function useLicenseAlerts() {
-  const { getLicenses, getBranches } = useDatabase();
-  const [alerts, setAlerts] = useState<LicenseAlert[]>([]);
-
-  const checkLicenseAlerts = useCallback(() => {
-    const licenses = getLicenses();
-    const branches = getBranches();
-    // ... تحقق من التراخيص وإنشاء التنبيهات
-  }, [getLicenses, getBranches]);
-
-  return {
-    alerts,
-    checkLicenseAlerts,
-    // ... المزيد
-  };
+### src/hooks/use-mobile.tsx
+```tsx
+import * as React from "react";
+const MOBILE_BREAKPOINT = 768;
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    mql.addEventListener("change", onChange);
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  return !!isMobile;
 }
 ```
 
 ---
 
-## ملاحظة
+## الأنماط
 
-هذا الملف يحتوي على الأكواد الرئيسية للمشروع. للحصول على الكود الكامل لجميع الملفات، يمكنك:
+### src/index.css
+```css
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap');
 
-1. تحميل المشروع من GitHub إذا كان متصلاً
-2. استخدام خاصية النسخ الاحتياطي في الإعدادات
-3. مراجعة كل ملف على حدة في محرر الأكواد
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 120 20% 97%;
+    --foreground: 150 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 150 10% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 10% 15%;
+    --primary: 122 45% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 120 25% 95%;
+    --secondary-foreground: 122 45% 34%;
+    --muted: 120 15% 92%;
+    --muted-foreground: 150 10% 45%;
+    --accent: 122 85% 50%;
+    --accent-foreground: 0 0% 100%;
+    --success: 122 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --info: 210 85% 55%;
+    --info-foreground: 0 0% 100%;
+    --border: 120 15% 88%;
+    --input: 120 15% 88%;
+    --ring: 122 45% 34%;
+    --radius: 0.75rem;
+    --gradient-primary: linear-gradient(135deg, hsl(122, 45%, 34%) 0%, hsl(122, 55%, 28%) 100%);
+    --gradient-header: linear-gradient(180deg, hsl(122, 45%, 34%) 0%, hsl(122, 50%, 30%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(120, 20%, 98%) 100%);
+    --shadow-sm: 0 1px 2px 0 hsl(150 10% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(150 10% 15% / 0.1), 0 2px 4px -2px hsl(150 10% 15% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(150 10% 15% / 0.1), 0 4px 6px -4px hsl(150 10% 15% / 0.1);
+    --shadow-card: 0 2px 8px -2px hsl(150 10% 15% / 0.08), 0 4px 16px -4px hsl(150 10% 15% / 0.12);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 150 15% 8%;
+    --foreground: 120 15% 95%;
+    --card: 150 15% 12%;
+    --card-foreground: 120 15% 95%;
+    --popover: 150 15% 12%;
+    --popover-foreground: 120 15% 95%;
+    --primary: 122 50% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 150 15% 18%;
+    --secondary-foreground: 120 15% 90%;
+    --muted: 150 15% 20%;
+    --muted-foreground: 120 10% 60%;
+    --accent: 122 75% 55%;
+    --accent-foreground: 0 0% 100%;
+    --success: 122 55% 50%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --info: 210 80% 60%;
+    --info-foreground: 0 0% 100%;
+    --border: 150 15% 22%;
+    --input: 150 15% 22%;
+    --ring: 122 50% 45%;
+    --gradient-primary: linear-gradient(135deg, hsl(122, 50%, 40%) 0%, hsl(122, 55%, 32%) 100%);
+    --gradient-header: linear-gradient(180deg, hsl(122, 50%, 38%) 0%, hsl(122, 55%, 28%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(150, 15%, 12%) 0%, hsl(150, 15%, 10%) 100%);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { direction: rtl; }
+  body { @apply bg-background text-foreground font-arabic antialiased; font-feature-settings: "rlig" 1, "calt" 1; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-muted rounded-full; }
+  ::-webkit-scrollbar-thumb { @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors; }
+}
+
+@layer components {
+  .pharma-card { @apply bg-card rounded-xl shadow-card border border-border/50 overflow-hidden; background: var(--gradient-card); }
+  .pharma-header { background: var(--gradient-header); }
+  .pharma-btn-primary { @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200; background: var(--gradient-primary); }
+  .pharma-input { @apply bg-background border border-input rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200; }
+  .pharma-badge { @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium; }
+  .pharma-badge-success { @apply bg-success/15 text-success; }
+  .pharma-badge-warning { @apply bg-warning/15 text-warning; }
+  .pharma-badge-destructive { @apply bg-destructive/15 text-destructive; }
+  .pharma-badge-info { @apply bg-info/15 text-info; }
+  .pharma-badge-error { @apply bg-destructive/15 text-destructive; }
+  .status-indicator { @apply w-2 h-2 rounded-full; }
+  .status-active { @apply bg-success; }
+  .status-warning { @apply bg-warning; }
+  .status-inactive { @apply bg-destructive; }
+  .offline-banner { @apply bg-warning/10 text-warning border border-warning/20 px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2; }
+}
+
+@layer utilities {
+  .text-gradient { @apply bg-clip-text text-transparent; background-image: var(--gradient-primary); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-soft { box-shadow: var(--shadow-md); }
+  .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+  .animate-slide-up { animation: slideUp 0.4s ease-out; }
+  .animate-scale-in { animation: scaleIn 0.3s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+}
+```
 
 ---
 
-**إجمالي الملفات:** ~50 ملف
-**اللغات المستخدمة:** TypeScript, React, Tailwind CSS
-**قاعدة البيانات:** localStorage (محلية)
+## هيكل الملفات
+
+```
+src/
+├── main.tsx
+├── App.tsx
+├── App.css
+├── index.css
+├── vite-env.d.ts
+├── components/
+│   ├── ThemeProvider.tsx
+│   ├── NavLink.tsx
+│   ├── alerts/
+│   │   ├── LicenseAlertsBadge.tsx
+│   │   └── LicenseAlertsProvider.tsx
+│   ├── charts/
+│   │   └── ReportCharts.tsx
+│   ├── dashboard/
+│   │   ├── AlertsList.tsx
+│   │   ├── BranchesOverview.tsx
+│   │   ├── QuickActions.tsx
+│   │   └── StatsCard.tsx
+│   ├── layout/
+│   │   ├── BottomNavigation.tsx
+│   │   └── Header.tsx
+│   ├── modals/
+│   │   ├── AddBranchModal.tsx
+│   │   ├── AddEmployeeModal.tsx
+│   │   ├── AddLicenseModal.tsx
+│   │   ├── AddOrderModal.tsx
+│   │   ├── AddProductModal.tsx
+│   │   └── AddSupplierModal.tsx
+│   └── ui/
+│       ├── PharmaIcon.tsx
+│       ├── button.tsx, card.tsx, input.tsx, ...
+│       └── (shadcn/ui components)
+├── hooks/
+│   ├── use-mobile.tsx
+│   ├── use-toast.ts
+│   ├── useDatabase.ts
+│   ├── useLicenseAlerts.ts
+│   └── useTheme.ts
+├── lib/
+│   ├── utils.ts
+│   ├── pdfExport.ts
+│   ├── projectExport.ts
+│   └── database/
+│       ├── index.ts
+│       ├── types.ts
+│       └── localStorage.ts
+└── pages/
+    ├── Branches.tsx
+    ├── Dashboard.tsx
+    ├── Inventory.tsx
+    ├── Licenses.tsx
+    ├── Login.tsx
+    ├── NotFound.tsx
+    ├── Orders.tsx
+    ├── Payroll.tsx
+    ├── Reports.tsx
+    ├── Settings.tsx
+    └── Suppliers.tsx
+```
+
+---
+
+> **ملاحظة هامة:** هذا الملف يحتوي على الملفات الأساسية للمشروع. بعض الملفات الكبيرة (مثل صفحات Branches, Inventory, Orders, Suppliers, Licenses, Payroll, Reports, Settings والمكونات الفرعية) لم يتم تضمينها بالكامل لتجنب حجم الملف الكبير. للحصول على الكود الكامل 100%، يُنصح بربط المشروع بـ GitHub.
