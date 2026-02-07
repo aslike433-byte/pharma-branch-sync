@@ -313,8 +313,8 @@ export default function Settings() {
                 <Database className="w-6 h-6 text-success" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">التخزين المحلي</p>
-                <p className="text-xs text-muted-foreground">localStorage - متصل</p>
+                <p className="font-medium">التخزين المحلي المتقدم</p>
+                <p className="text-xs text-muted-foreground">IndexedDB - متصل</p>
               </div>
               <div className="px-3 py-1 rounded-full bg-success/10 text-success text-xs font-medium">
                 نشط
